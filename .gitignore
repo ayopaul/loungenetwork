@@ -1,1 +1,5 @@
 node_modules/
+/public/thumbnails/
+/public/media/
+/public/thumbnails/*
+/public/media/*
