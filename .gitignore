@@ -1,5 +1,28 @@
+
+# Node & build
 node_modules/
-/public/thumbnails/
-/public/media/
-/public/thumbnails/*
-/public/media/*
+.next/
+out/
+dist/
+
+# Environment
+.env*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Keep folders (optional)
+!/public/thumbnails/.keep
+!/public/media/.keep
+node_modules/
