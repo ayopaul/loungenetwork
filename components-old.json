@@ -1,0 +1,16 @@
+{
+    "style": "default",
+    "rsc": true,
+    "appDir": true,
+    "tailwind": {
+      "config": "tailwind.config.js",
+      "css": "styles/globals.css",
+      "baseColor": "zinc",
+      "radius": "md"
+    },
+    "aliases": {
+      "components": "@/components",
+      "utils": "@/lib"
+    }
+  }
+  
