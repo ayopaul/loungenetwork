@@ -26,3 +26,7 @@ Thumbs.db
 !/public/thumbnails/.keep
 !/public/media/.keep
 node_modules/
+
+# Ignore mirror clones or cleanup artifacts
+loungenetwork.git/
+loungenetwork.git.bfg-report/

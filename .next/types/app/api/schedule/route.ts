@@ -1,4 +1,4 @@
-// File: /Users/ayopaul/Documents/loungenetwork-bankai/app/api/schedule/route.ts
+// File: /Users/ayopaul/Desktop/loungenetwork-bankai/app/api/schedule/route.ts
 import * as entry from '../../../../../app/api/schedule/route.js'
 import type { NextRequest } from 'next/server.js'
 

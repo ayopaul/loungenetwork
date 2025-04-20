@@ -3,16 +3,15 @@ import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="w-full bg-primary text-white px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-50">
-      <Link href="/" className="flex items-center space-x-2">
-        <Image src="/logo.svg" alt="Lounge Network" width={36} height={36} />
-        <span className="font-bold text-lg">Lounge Network</span>
-      </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-md border-b border-white/20 transition-all">
+  <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <span className="font-bold text-lg">Lounge Network</span>
+    <ul className="flex gap-4 text-sm">
+      <li><a href="#schedule" className="hover:underline">Schedule</a></li>
+      <li><a href="/admin" className="hover:underline">Admin</a></li>
+    </ul>
+  </div>
+</nav>
 
-      <ul className="flex space-x-6 text-sm font-medium">
-        <li><Link href="#schedule" className="hover:text-accent transition">Schedule</Link></li>
-        <li><Link href="/admin" className="hover:text-accent transition">Admin</Link></li>
-      </ul>
-    </nav>
   );
 }

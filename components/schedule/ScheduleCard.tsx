@@ -22,7 +22,7 @@ export default function ScheduleCard({
   isLive = false,
 }: ScheduleCardProps) {
   return (
-    <div className="w-full max-w-[420px] mx-auto">
+    <div className="w-full max-w-[360px] mx-auto">
       <Card
         className={`relative overflow-hidden rounded-xl p-0 border border-white/10 transition duration-200 ${
           isLive ? "ring-2 ring-red-500" : "hover:shadow-lg shadow-none"
