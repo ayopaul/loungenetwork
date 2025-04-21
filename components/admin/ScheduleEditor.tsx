@@ -85,11 +85,11 @@ export default function ScheduleEditor() {
   };
 
   if (!selected) return <p className="text-sm text-muted-foreground">Select a station to begin editing.</p>;
-  if (loading) return <p className="text-sm">Loading schedule...</p>;
+  if (loading) return <p className="text-sm text-muted-foreground">Loading schedule...</p>;
 
   return (
-    <main className="p-6 max-w-6xl mx-auto">
-      <h2 className="text-lg font-semibold text-foreground">Editing: {selected.name}</h2>
+    <main className="p-6 max-w-6xl mx-auto bg-background text-foreground rounded-lg">
+      <h2 className="text-lg font-semibold mb-4">Editing: {selected.name}</h2>
 
       <Tabs defaultValue="0" className="w-full" onValueChange={setActiveDay}>
         <TabsList className="mb-4 overflow-x-auto">
@@ -107,7 +107,10 @@ export default function ScheduleEditor() {
             <TabsContent key={day.value} value={day.value}>
               <div className="space-y-6">
                 {daySlots.map(slot => (
-                  <div key={slot.id} className="border p-6 rounded-lg bg-white text-black space-y-4 shadow-sm">
+                  <div
+                    key={slot.id}
+                    className="border border-border bg-muted/50 backdrop-blur rounded-lg p-6 space-y-4 shadow-sm transition hover:bg-muted/70"
+                  >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor={`title-${slot.id}`}>Show Title</Label>

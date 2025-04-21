@@ -1,0 +1,82 @@
+'use client';
+
+import { useEffect, useState } from "react";
+import { useStationStore } from "@/stores/useStationStore";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+type Post = {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  excerpt: string;
+  coverImage: string;
+  published: boolean;
+};
+
+export default function BlogByCategory({ limit = 4 }: { limit?: number }) {
+  const { selected } = useStationStore();
+  const [grouped, setGrouped] = useState<Record<string, Post[]>>({});
+
+  useEffect(() => {
+    if (!selected?.id) return;
+
+    fetch(`/api/blog?stationId=${selected.id}`)
+      .then((res) => res.json())
+      .then((posts: Post[]) => {
+        const filtered = posts.filter((p) => p.published);
+        const groupedByCategory = filtered.reduce((acc: Record<string, Post[]>, post) => {
+          if (!acc[post.category]) acc[post.category] = [];
+          acc[post.category].push(post);
+          return acc;
+        }, {});
+        setGrouped(groupedByCategory);
+      });
+  }, [selected]);
+
+  if (!selected) return null;
+
+  return (
+    <section className="space-y-10">
+      {Object.entries(grouped).map(([category, posts]) => (
+        <div key={category} className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-foreground">{category}</h3>
+            <Link
+              href={`/blog/category/${encodeURIComponent(category)}`}
+              className="text-sm text-primary underline"
+            >
+              View all
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {posts.slice(0, limit).map((post) => (
+              <Card
+                key={post.id}
+                className="flex flex-col h-full p-4 bg-muted hover:bg-muted/70 transition"
+              >
+                {post.coverImage && (
+                  <img
+                    src={post.coverImage}
+                    alt={post.title}
+                    className="w-full h-36 object-cover rounded mb-3"
+                  />
+                )}
+                <div className="flex-1">
+                  <h4 className="font-semibold text-base line-clamp-1">{post.title}</h4>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+                </div>
+                <Link href={`/blog/${post.slug}`} className="mt-3">
+                  <Button variant="link" className="px-0">Read More</Button>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}

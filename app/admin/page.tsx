@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import SettingsShell from '@/components/admin/SettingsShell';
-import ScheduleEditor from '@/components/admin/ScheduleEditor'; // shows
-// import BlogEditor from '@/components/admin/BlogEditor'; // blog (later)
-// import StationEditor from '@/components/admin/StationEditor'; // stations (later)
+import ScheduleEditor from '@/components/admin/ScheduleEditor';
+
+const BlogManager = dynamic(() => import('@/components/admin/BlogManager'), {
+  loading: () => <p className="text-muted-foreground">Loading blog manager...</p>,
+  ssr: false,
+});
 
 export default function AdminSettingsPage() {
   const [section, setSection] = useState<'shows' | 'blog' | 'stations'>('shows');
@@ -14,16 +18,21 @@ export default function AdminSettingsPage() {
       title="Settings"
       description="Manage your station settings and set show preferences."
       nav={[
+        { label: 'Stations', value: 'stations' },
         { label: 'Shows', value: 'shows' },
         { label: 'Blog', value: 'blog' },
-        { label: 'Stations', value: 'stations' },
       ]}
+      
       current={section}
-      onSelect={(val) => setSection(val as "shows" | "blog" | "stations")}
+      onSelect={(val) => setSection(val as 'shows' | 'blog' | 'stations')}
     >
-      {section === 'shows' && <ScheduleEditor />}
-      {/* {section === 'blog' && <BlogEditor />} */}
-      {/* {section === 'stations' && <StationEditor />} */}
+      <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
+        {section === 'shows' && <ScheduleEditor />}
+        {section === 'blog' && <BlogManager />}
+        {section === 'stations' && (
+          <p className="text-muted-foreground">Station editor coming soon.</p>
+        )}
+      </div>
     </SettingsShell>
   );
 }

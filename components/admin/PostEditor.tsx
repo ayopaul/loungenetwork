@@ -96,14 +96,16 @@ export default function PostEditor() {
         />
       </div>
 
-      <div className="flex items-center gap-4">
-        <Label htmlFor="published">Published</Label>
+      <div className="flex items-center space-x-2">
         <Switch
-          id="published"
-          checked={post.published}
-          onCheckedChange={(checked) => handleChange("published", checked)}
+            id="published"
+            checked={post.published}
+            onCheckedChange={(checked) => handleChange("published", checked)}
         />
-      </div>
+        <Label htmlFor="published">Published</Label>
+        </div>
+
+
 
       <Button onClick={handleSave}>Save Post</Button>
     </div>

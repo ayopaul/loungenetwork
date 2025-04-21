@@ -15,8 +15,15 @@ export async function POST(req: NextRequest) {
     const raw = await fs.readFile(filePath, "utf-8");
     const allPosts = JSON.parse(raw);
 
-    const stationPosts = allPosts[stationId] || {};
-    stationPosts[post.slug] = post;
+    const stationPosts: any[] = allPosts[stationId] || [];
+
+    // Replace post if slug exists, else add new
+    const index = stationPosts.findIndex((p) => p.slug === post.slug);
+    if (index !== -1) {
+      stationPosts[index] = post;
+    } else {
+      stationPosts.push(post);
+    }
 
     allPosts[stationId] = stationPosts;
 
