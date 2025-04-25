@@ -6,10 +6,12 @@ import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import BlogManager from "@/components/admin/BlogManager";
 
 
-
 const StationManager = () => (
-  <div className="bg-white rounded-lg shadow p-6 text-muted-foreground text-sm">
-    Station manager coming soon...
+  <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
+    <h2 className="text-xl font-semibold">Manage Stations</h2>
+    <p className="text-muted-foreground">
+      This is a placeholder for the Station Manager component.
+    </p>
   </div>
 );
 

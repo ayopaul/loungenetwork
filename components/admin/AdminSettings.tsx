@@ -4,12 +4,14 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import BlogManager from "@/components/admin/BlogManager";
-import StationManager from "@/components/admin/StationManager"; // ✅ Correct import
+import StationManager from "@/components/admin/StationManager"; 
+import { AdminAuthWrapper } from "@/components/admin/AdminAuthWrapper";
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("stations");
 
   return (
+    <AdminAuthWrapper>
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <div className="flex-1 p-6 space-y-6 max-w-7xl mx-auto">
         <div>
@@ -42,5 +44,6 @@ export default function AdminSettings() {
         </Tabs>
       </div>
     </div>
+    </AdminAuthWrapper>
   );
 }

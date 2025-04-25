@@ -1,36 +1,45 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { cn } from '@/lib/utils'; // assumes you're using ShadCN's `cn` utility
+import { Button } from "@/components/ui/button";
 
-type SidebarNavItem = {
+type NavItem = {
   label: string;
   value: string;
 };
 
-type Props = {
-  items: SidebarNavItem[];
+interface SidebarNavProps {
+  items: NavItem[];
   current: string;
   onSelect: (value: string) => void;
-};
+}
 
-export function SidebarNav({ items, current, onSelect }: Props) {
+export function SidebarNav({ items, current, onSelect }: SidebarNavProps) {
   return (
-    <nav className="flex flex-col space-y-1 text-sm">
+    <nav className="flex flex-col space-y-2">
       {items.map((item) => (
-        <button
+        <Button
           key={item.value}
+          variant={current === item.value ? "secondary" : "ghost"}
+          className="justify-start"
           onClick={() => onSelect(item.value)}
-          className={cn(
-            'text-left px-3 py-2 rounded-md font-medium transition-colors',
-            current === item.value
-              ? 'bg-muted text-foreground'
-              : 'text-muted-foreground hover:text-primary'
-          )}
         >
           {item.label}
-        </button>
+        </Button>
       ))}
+
+      <hr className="my-4 border-border" />
+
+      {/* Logout Button */}
+      <Button
+        variant="destructive"
+        className="justify-start"
+        onClick={() => {
+          localStorage.removeItem("admin");
+          window.location.href = "/";
+        }}
+      >
+        Log out
+      </Button>
     </nav>
   );
 }

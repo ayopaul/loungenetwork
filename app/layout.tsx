@@ -1,26 +1,22 @@
+// app/layout.tsx
 'use client';
 
+import { ThemeProvider } from "@/components/theme-provider"; // <-- your theme-provider file
 import "@/styles/globals.css";
+import Navbar from "@/components/layout/Navbar";
+import GlobalAudioPlayer from "@/components/player/GlobalAudioPlayer";
 import dynamic from "next/dynamic";
-import { ThemeProvider } from "next-themes";
-import { Inter } from "next/font/google";
-import { Mounted } from "@/components/Mounted";
 
-const inter = Inter({ subsets: ["latin"] });
-
-const PlayerDock = dynamic(() => import('@/components/player/PlayerDock'), {
-  ssr: false,
-});
+const PlayerDock = dynamic(() => import('@/components/player/PlayerDock'), { ssr: false });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <Mounted>
+      <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
           <PlayerDock />
-        </ThemeProvider> </Mounted>
+        </ThemeProvider>
       </body>
     </html>
   );

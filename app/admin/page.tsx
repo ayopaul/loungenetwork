@@ -4,6 +4,7 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import SettingsShell from '@/components/admin/SettingsShell';
 import ScheduleEditor from '@/components/admin/ScheduleEditor';
+import StationManager from '@/components/admin/StationManager';
 
 const BlogManager = dynamic(() => import('@/components/admin/BlogManager'), {
   loading: () => <p className="text-muted-foreground">Loading blog manager...</p>,
@@ -29,9 +30,7 @@ export default function AdminSettingsPage() {
       <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
         {section === 'shows' && <ScheduleEditor />}
         {section === 'blog' && <BlogManager />}
-        {section === 'stations' && (
-          <p className="text-muted-foreground">Station editor coming soon.</p>
-        )}
+        {section === 'stations' && <StationManager />}
       </div>
     </SettingsShell>
   );
