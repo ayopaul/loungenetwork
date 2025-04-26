@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import SettingsShell from '@/components/admin/SettingsShell';
 import ScheduleEditor from '@/components/admin/ScheduleEditor';
 import StationManager from '@/components/admin/StationManager';
+import { AdminAuthWrapper } from '@/components/admin/AdminAuthWrapper'; 
 
 const BlogManager = dynamic(() => import('@/components/admin/BlogManager'), {
   loading: () => <p className="text-muted-foreground">Loading blog manager...</p>,
@@ -15,6 +16,7 @@ export default function AdminSettingsPage() {
   const [section, setSection] = useState<'shows' | 'blog' | 'stations'>('shows');
 
   return (
+    <AdminAuthWrapper>
     <SettingsShell
       title="Settings"
       description="Manage your station settings and set show preferences."
@@ -32,6 +34,7 @@ export default function AdminSettingsPage() {
         {section === 'blog' && <BlogManager />}
         {section === 'stations' && <StationManager />}
       </div>
-    </SettingsShell>
+    </SettingsShell>|
+    </AdminAuthWrapper>
   );
 }

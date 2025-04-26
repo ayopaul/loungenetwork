@@ -1,38 +1,42 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import SettingsShell from "@/components/admin/SettingsShell";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import BlogManager from "@/components/admin/BlogManager";
-
-
-const StationManager = () => (
-  <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
-    <h2 className="text-xl font-semibold">Manage Stations</h2>
-    <p className="text-muted-foreground">
-      This is a placeholder for the Station Manager component.
-    </p>
-  </div>
-);
+import StationManager from "@/components/admin/StationManager";
 
 export default function AdminSettings() {
-  const [section, setSection] = useState<"shows" | "blog" | "stations">("shows");
+  const [activeTab, setActiveTab] = useState("stations");
 
   return (
-    <SettingsShell
-      title="Settings"
-      description="Manage your station settings and set show preferences."
-      nav={[
-        { label: "Shows", value: "shows" },
-        { label: "Blog", value: "blog" },
-        { label: "Stations", value: "stations" }
-      ]}
-      current={section}
-      onSelect={(val) => setSection(val as "shows" | "blog" | "stations")}
-    >
-      {section === "shows" && <ScheduleEditor />}
-      {section === "blog" && <BlogManager />}
-      {section === "stations" && <StationManager />}
-    </SettingsShell>
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <div className="flex-1 p-6 space-y-6 max-w-7xl mx-auto">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">Settings</h2>
+        <p className="text-muted-foreground">Manage your station settings and set show preferences.</p>
+
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            <TabsList className="md:flex md:flex-col w-full md:w-1/4">
+              <TabsTrigger value="stations">Stations</TabsTrigger>
+              <TabsTrigger value="shows">Shows</TabsTrigger>
+              <TabsTrigger value="blog">Blog</TabsTrigger>
+            </TabsList>
+
+            <div className="flex-1">
+              <TabsContent value="stations">
+                <StationManager />
+              </TabsContent>
+              <TabsContent value="shows">
+                <ScheduleEditor />
+              </TabsContent>
+              <TabsContent value="blog">
+                <BlogManager />
+              </TabsContent>
+            </div>
+          </div>
+        </Tabs>
+      </div>
+    </div>
   );
 }
