@@ -1,5 +1,7 @@
 {
-  "/api/stations/route": "app/api/stations/route.js",
   "/page": "app/page.js",
+  "/api/schedule/route": "app/api/schedule/route.js",
+  "/api/blog/route": "app/api/blog/route.js",
+  "/api/stations/route": "app/api/stations/route.js",
   "/admin/page": "app/admin/page.js"
 }

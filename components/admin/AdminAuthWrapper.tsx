@@ -1,60 +1,64 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'password123'; // fallback if env is not loaded
 
 export function AdminAuthWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem('admin-auth');
-    if (stored === 'true') {
-      setIsAuthenticated(true);
+    if (typeof window !== 'undefined') {
+      const savedPassword = window.sessionStorage.getItem('admin_password');
+      if (savedPassword && savedPassword === ADMIN_PASSWORD) {
+        setAuthenticated(true);
+      }
+      setLoading(false);
     }
   }, []);
 
-  const handleLogin = () => {
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      localStorage.setItem('admin-auth', 'true');
-      setIsAuthenticated(true);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const input = (e.target as HTMLFormElement).elements.namedItem('password') as HTMLInputElement;
+    const enteredPassword = input.value;
+
+    if (enteredPassword === ADMIN_PASSWORD) {
+      sessionStorage.setItem('admin_password', enteredPassword);
+      setAuthenticated(true);
     } else {
       alert('Incorrect password.');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin-auth');
-    router.push('/admin');
-    window.location.reload();
-  };
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
 
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      {!isAuthenticated ? (
-        <div className="flex flex-col items-center justify-center min-h-screen space-y-4 p-6">
-          <h2 className="text-xl font-bold">Admin Login</h2>
-          <Input
+  if (!authenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-background text-foreground border p-6 rounded-lg shadow w-full max-w-sm"
+        >
+          <h2 className="text-lg font-semibold">Admin Access</h2>
+          <input
             type="password"
-            placeholder="Enter Admin Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            placeholder="Enter admin password"
+            className="w-full p-2 rounded border"
           />
-          <Button onClick={handleLogin}>Login</Button>
-        </div>
-      ) : (
-        <div className="min-h-screen flex flex-col">
-          <div className="flex justify-end p-4">
-            <Button variant="outline" onClick={handleLogout}>
-              Logout
-            </Button>
-          </div>
-          {children}
-        </div>
-      )}
-    </div>
-  );
+          <button
+            type="submit"
+            className="w-full p-2 bg-primary text-white rounded hover:bg-primary/80 transition"
+          >
+            Enter
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }

@@ -2,30 +2,36 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useCurrentShow } from "@/hooks/useCurrentShow";
+import { useStationStore } from "@/stores/useStationStore";
 import { PlayIcon, SquareIcon, Volume2Icon } from "lucide-react";
 import Image from "next/image";
-import { useStationStore } from "@/stores/useStationStore";
 
 export default function PlayerDock() {
+  const [mounted, setMounted] = useState(false); // ✅ this is fine
   const { selected } = useStationStore();
-  if (!selected) return null; // ✅ guard hook call
-
   const show = useCurrentShow();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
 
-  const streamUrl = selected.streamUrl;
+  // ✅ Always call all hooks, no returns before them
 
   useEffect(() => {
-    audioRef.current = new Audio(streamUrl);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !selected?.streamUrl) return;
+
+    audioRef.current = new Audio(selected.streamUrl);
     audioRef.current.loop = true;
     audioRef.current.volume = volume;
+
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
     };
-  }, [streamUrl]);
+  }, [mounted, selected?.streamUrl, volume]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -34,9 +40,9 @@ export default function PlayerDock() {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(err => {
-        console.error("Audio play error:", err);
-      });
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => console.error("Audio play error:", err));
     }
   };
 
@@ -46,7 +52,8 @@ export default function PlayerDock() {
     if (audioRef.current) audioRef.current.volume = vol;
   };
 
-  if (!show) return null;
+  // ✅ Only skip render output, not hooks
+  if (!mounted || !selected || !show) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md px-4 py-2 flex items-center justify-between">
