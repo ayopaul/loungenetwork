@@ -6,12 +6,15 @@ import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import BlogManager from "@/components/admin/BlogManager";
 import StationManager from "@/components/admin/StationManager";
 import { AdminAuthWrapper } from "@/components/admin/AdminAuthWrapper";
+import ProtectedRoute from "@/components/ProtectedRoute";
+
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("stations");
 
   return (
-    <AdminAuthWrapper>
+    <ProtectedRoute>
+      <AdminAuthWrapper>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <div className="flex-1 p-6 space-y-6 max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold tracking-tight text-foreground">Settings</h2>
@@ -43,5 +46,6 @@ export default function AdminSettings() {
         </div>
       </div>
     </AdminAuthWrapper>
+    </ProtectedRoute>
   );
 }
