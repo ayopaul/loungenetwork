@@ -14,9 +14,7 @@ export default function Navbar() {
           <li>
             <a href="#schedule" className="hover:underline">Schedule</a>
           </li>
-          <li>
-            <Link href="/admin" className="hover:underline">Admin</Link>
-          </li>
+         
           <ThemeToggle />
         </ul>
       </div>

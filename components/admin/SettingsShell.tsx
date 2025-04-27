@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { SidebarNav } from './SidebarNav';
-import ThemeToggle from './ThemeToggle';
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { SidebarNav } from "@/components/admin/SidebarNav"; // Make sure this exists
+import ThemeToggle from "@/components/admin/ThemeToggle"; // Make sure this exists
 
-type NavItem = {
+interface NavItem {
   label: string;
   value: string;
-};
+}
 
 interface SettingsShellProps {
   title: string;
   description: string;
   nav: NavItem[];
   current: string;
-  onSelect: (value: string) => void;
+  onSelect: (val: string) => void;
   children: React.ReactNode;
 }
 
-export default function SettingsShell({
+export function SettingsShell({
   title,
   description,
   nav,
@@ -27,28 +26,24 @@ export default function SettingsShell({
   onSelect,
   children,
 }: SettingsShellProps) {
-  const handleLogout = () => {
-    localStorage.removeItem("admin-password");
-    window.location.href = "/admin"; // ✅ force reload
-  };
-  
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null; // or a skeleton loader
+  }
 
   return (
     <div className="space-y-6 p-10 pb-16 bg-background text-foreground min-h-screen">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+      <div className="flex justify-between items-start flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           <p className="text-muted-foreground">{description}</p>
         </div>
-
-        {/* Right-side controls */}
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-          <Button variant="outline" onClick={handleLogout}>
-            Log out
-          </Button>
-
-        </div>
+        <ThemeToggle />
       </div>
 
       <hr className="border-t border-border" />

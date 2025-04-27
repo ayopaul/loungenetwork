@@ -4,7 +4,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LivePlayer from "@/components/radio/LivePlayer";
 import WeeklyTabs from "@/components/schedule/WeeklyTabs";
-import { StationSelect } from "@/components/station/StationSelect";
 import { useStationStore } from "@/stores/useStationStore";
 import BlogByCategory from "@/components/blog/BlogByCategory";
 
@@ -39,7 +38,7 @@ export default function HomePage() {
               <p className="text-base text-muted-foreground">
                 Your sound lives here. Tune in and vibe with Lounge.
               </p>
-              <StationSelect />
+            
             </div>
 
             {selected && (

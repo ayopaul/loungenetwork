@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+import { SessionProvider } from "next-auth/react";
 
 type NavItem = {
   label: string;
@@ -15,6 +17,7 @@ interface SidebarNavProps {
 
 export function SidebarNav({ items, current, onSelect }: SidebarNavProps) {
   return (
+    <SessionProvider>
     <nav className="flex flex-col space-y-2">
       {items.map((item) => (
         <Button
@@ -34,12 +37,12 @@ export function SidebarNav({ items, current, onSelect }: SidebarNavProps) {
         variant="destructive"
         className="justify-start"
         onClick={() => {
-          localStorage.removeItem("admin");
-          window.location.href = "/";
+          signOut({ callbackUrl: "/admin/login" }); // 👈 force redirect to login page after logout
         }}
       >
         Log out
       </Button>
-    </nav>
+
+    </nav></SessionProvider>
   );
 }

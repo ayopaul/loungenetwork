@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useStationStore } from "@/stores/useStationStore";
 import { useBlogStore } from "@/stores/useBlogStore";
 import PostDialog from "./PostDialog";
 
@@ -16,31 +15,34 @@ type BlogPost = {
   published: boolean;
 };
 
-export default function BlogManager() {
-  const { selected } = useStationStore();
+interface BlogManagerProps {
+  station: { id: string; name: string };
+}
+
+export default function BlogManager({ station }: BlogManagerProps) {
   const { openDialog } = useBlogStore();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!station) return;
 
     setLoading(true);
-    fetch(`/api/blog?stationId=${selected.id}`)
+    fetch(`/api/blog?stationId=${station.id}`)
       .then((res) => res.json())
       .then((data: BlogPost[]) => {
         const sorted = [...data].sort((a, b) => b.id.localeCompare(a.id));
         setPosts(sorted);
       })
       .finally(() => setLoading(false));
-  }, [selected]);
+  }, [station]);
 
-  if (!selected) return <p className="text-muted-foreground">No station selected.</p>;
+  if (!station) return <p className="text-muted-foreground">No station selected.</p>;
 
   return (
     <div className="space-y-6 bg-background text-foreground p-4 rounded-lg">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Blog Posts for {selected.name}</h2>
+        <h2 className="text-xl font-semibold">Blog Posts for {station.name}</h2>
         <Button variant="outline" onClick={() => openDialog()}>+ Create Post</Button>
       </div>
 

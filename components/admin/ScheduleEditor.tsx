@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useStationStore } from "@/stores/useStationStore";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,21 +27,24 @@ const weekdays = [
   { label: "Saturday", value: "6" },
 ];
 
-export default function ScheduleEditor() {
-  const { selected } = useStationStore();
+interface ScheduleEditorProps {
+  station: { id: string; name: string };
+}
+
+export default function ScheduleEditor({ station }: ScheduleEditorProps) {
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState("0");
 
   useEffect(() => {
-    if (!selected?.id) return;
+    if (!station?.id) return;
 
     setLoading(true);
-    fetch(`/api/schedule?stationId=${selected.id}`)
+    fetch(`/api/schedule?stationId=${station.id}`)
       .then(res => res.json())
       .then((data: ScheduleSlot[]) => setSchedule(data))
       .finally(() => setLoading(false));
-  }, [selected]);
+  }, [station]);
 
   const updateSlot = (id: string, field: keyof ScheduleSlot, value: string) => {
     setSchedule(prev =>
@@ -71,7 +73,7 @@ export default function ScheduleEditor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          stationId: selected?.id,
+          stationId: station?.id,
           schedule,
         }),
       });
@@ -84,12 +86,12 @@ export default function ScheduleEditor() {
     }
   };
 
-  if (!selected) return <p className="text-sm text-muted-foreground">Select a station to begin editing.</p>;
+  if (!station) return <p className="text-sm text-muted-foreground">Select a station to begin editing.</p>;
   if (loading) return <p className="text-sm text-muted-foreground">Loading schedule...</p>;
 
   return (
     <main className="p-6 max-w-6xl mx-auto bg-background text-foreground rounded-lg">
-      <h2 className="text-lg font-semibold mb-4">Editing: {selected.name}</h2>
+      <h2 className="text-lg font-semibold mb-4">Editing: {station.name}</h2>
 
       <Tabs defaultValue="0" className="w-full" onValueChange={setActiveDay}>
         <TabsList className="mb-4 overflow-x-auto">

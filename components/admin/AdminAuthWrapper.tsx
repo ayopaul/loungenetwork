@@ -1,16 +1,26 @@
 "use client";
-import { useEffect } from "react";
+
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export function AdminAuthWrapper({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("admin-auth");
-    if (!isAuthenticated) {
-      router.replace("/admin/login"); // or wherever your auth form is
+    if (status === "unauthenticated") {
+      router.replace("/admin/login");
     }
-  }, []);
+  }, [status, router]);
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    return null; // Prevent rendering if not authenticated
+  }
 
   return <>{children}</>;
 }

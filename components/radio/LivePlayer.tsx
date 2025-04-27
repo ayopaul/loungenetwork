@@ -6,6 +6,7 @@ import { useStationStore } from "@/stores/useStationStore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { PlayIcon, SquareIcon } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { StationSelect } from "@/components/station/StationSelect";
 
 export default function LivePlayer() {
   const { selected } = useStationStore();
@@ -38,6 +39,7 @@ export default function LivePlayer() {
     <Card className="mt-8 sm:mt-6 bg-white text-black relative overflow-hidden shadow-xl">
       <div className="absolute inset-0 bg-black opacity-20 z-0" />
       <CardHeader className="relative z-10">
+      <StationSelect />
         <Badge variant="destructive" className="text-xs font-semibold animate-pulse">
           ON AIR NOW
         </Badge>
