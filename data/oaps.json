@@ -1,0 +1,35 @@
+[
+    {
+      "id": "1",
+      "name": "Symon",
+      "role": "Presenter",
+      "bio": "Tune in to catch Symon (with the Y) on the Power Down show Monday to...",
+      "photoUrl": "/oaps/symon.jpg",
+      "showSlugs": []
+    },
+    {
+      "id": "2",
+      "name": "Eniivy",
+      "role": "Presenter",
+      "bio": "Catch Eniivy on the drive time show, \"Bumper to Bumper,\" every Monday...",
+      "photoUrl": "/oaps/eniivy.jpg",
+      "showSlugs": []
+    },
+    {
+      "id": "3",
+      "name": "Nekky",
+      "role": "Presenter",
+      "bio": "Nekky on the Power Up Morning Show on Lounge 87.7 for your daily dose of...",
+      "photoUrl": "/oaps/nekky.jpg",
+      "showSlugs": []
+    },
+    {
+      "id": "4",
+      "name": "Kelvin AB",
+      "role": "Presenter",
+      "bio": "Catch Kelvin and his witty personality every weekday from 11 am - 4 pm on the...",
+      "photoUrl": "/oaps/kelvin-ab.jpg",
+      "showSlugs": []
+    }
+  ]
+  

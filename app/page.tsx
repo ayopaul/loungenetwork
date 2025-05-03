@@ -7,6 +7,7 @@ import WeeklyTabs from "@/components/schedule/WeeklyTabs";
 import { useStationStore } from "@/stores/useStationStore";
 import BlogByCategory from "@/components/blog/BlogByCategory";
 
+
 export default function HomePage() {
   const { selected } = useStationStore();
 
@@ -51,8 +52,12 @@ export default function HomePage() {
 
         {/* Schedule Section */}
         <section className="mb-20">
-          <h2 className="text-2xl font-semibold mb-6">Weekly Schedule</h2>
-          {selected && <WeeklyTabs />}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            {selected && <WeeklyTabs />}
+          </div>
+
+          {/* Now the shows grid can stay here */}
+          {/* (whatever component you use to render the schedule cards) */}
         </section>
 
         <div className="bg-[url('/bank-note.svg')] bg-cover" />

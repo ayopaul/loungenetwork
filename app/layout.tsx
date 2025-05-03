@@ -5,6 +5,8 @@ import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"; //
 import PlayerDock from "@/components/player/PlayerDock";
 import Navbar from "@/components/layout/Navbar";
 
+import { Toaster } from "sonner";
+
 export const metadata = {
   title: "Lounge Network",
   description: "Streaming radio across stations and shows",
@@ -22,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <PlayerDock />
           </ThemeProvider>
         </SessionProviderWrapper>
+        <Toaster />
       </body>
     </html>
   );

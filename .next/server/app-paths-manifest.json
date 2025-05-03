@@ -1,8 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/api/schedule/route": "app/api/schedule/route.js",
-  "/api/stations/route": "app/api/stations/route.js",
-  "/api/blog/route": "app/api/blog/route.js",
-  "/admin/login/page": "app/admin/login/page.js",
-  "/admin/page": "app/admin/page.js"
-}
