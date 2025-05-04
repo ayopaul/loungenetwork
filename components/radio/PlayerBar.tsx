@@ -1,34 +1,14 @@
-// components/radio/PlayerBar.tsx
-"use client";
 
-import { useEffect, useRef, useState } from "react";
+// ✅ 4. PlayerBar.tsx
+"use client";
+import { useGlobalAudio } from "@/stores/useGlobalAudio";
 import { useCurrentShow } from "@/hooks/useCurrentShow";
 import { PlayIcon, SquareIcon } from "lucide-react";
 import Image from "next/image";
 
-const streamUrl = "https://lounge877fmlagos-atunwadigital.streamguys1.com/lounge877fmlagos";
-
 export default function PlayerBar() {
   const show = useCurrentShow();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const togglePlayback = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(streamUrl);
-      audioRef.current.loop = true;
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch((err) => {
-        console.error("Playback failed:", err);
-      });
-    }
-
-    setIsPlaying(!isPlaying);
-  };
+  const { isPlaying, togglePlayback } = useGlobalAudio();
 
   if (!show) return null;
 
@@ -57,3 +37,4 @@ export default function PlayerBar() {
     </div>
   );
 }
+

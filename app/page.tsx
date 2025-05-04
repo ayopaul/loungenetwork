@@ -1,15 +1,24 @@
 'use client';
 
+import { useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LivePlayer from "@/components/radio/LivePlayer";
 import WeeklyTabs from "@/components/schedule/WeeklyTabs";
 import { useStationStore } from "@/stores/useStationStore";
 import BlogByCategory from "@/components/blog/BlogByCategory";
-
+import AudioVisualizer from "@/components/radio/AudioVisualizer";
+import stations from "@/data/stations.json"; // assuming this file exists
 
 export default function HomePage() {
-  const { selected } = useStationStore();
+  const { selected, setSelected } = useStationStore();
+
+  // Select the first station as default if none is selected
+  useEffect(() => {
+    if (!selected && stations.length > 0) {
+      setSelected(stations[0]); // fallback to first station
+    }
+  }, [selected]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -21,16 +30,8 @@ export default function HomePage() {
           {/* Semi-transparent overlay */}
           <div className="absolute inset-0 bg-muted/70 backdrop-blur-sm z-10" />
 
-          {/* Video background */}
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="/media/hero-bg.mp4" type="video/mp4" />
-          </video>
+          {/* Audio waveform */}
+          {selected && <AudioVisualizer />}
 
           {/* Overlay content */}
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center h-full p-6 bg-muted/40 backdrop-blur-sm rounded-2xl">
@@ -39,7 +40,6 @@ export default function HomePage() {
               <p className="text-base text-muted-foreground">
                 Your sound lives here. Tune in and vibe with Lounge.
               </p>
-            
             </div>
 
             {selected && (
@@ -51,18 +51,16 @@ export default function HomePage() {
         </section>
 
         {/* Schedule Section */}
-        <section className="mb-20">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-            {selected && <WeeklyTabs />}
-          </div>
-
-          {/* Now the shows grid can stay here */}
-          {/* (whatever component you use to render the schedule cards) */}
-        </section>
+        {selected && (
+          <section className="mb-20">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+              <WeeklyTabs />
+            </div>
+          </section>
+        )}
 
         <div className="bg-[url('/bank-note.svg')] bg-cover" />
         <BlogByCategory limit={4} />
-
       </main>
 
       <Footer />

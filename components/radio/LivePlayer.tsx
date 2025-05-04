@@ -1,37 +1,15 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { useCurrentShow } from "@/hooks/useCurrentShow";
-import { useStationStore } from "@/stores/useStationStore";
+import { useGlobalAudio } from "@/stores/useGlobalAudio";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { PlayIcon, SquareIcon } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { StationSelect } from "@/components/station/StationSelect";
 
 export default function LivePlayer() {
-  const { selected } = useStationStore();
-  if (!selected) return null;
-
   const show = useCurrentShow();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const streamUrl = selected.streamUrl;
-
-  const togglePlayback = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(streamUrl);
-      audioRef.current.loop = true;
-    }
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch((err) => console.error("Audio play error:", err));
-    }
-
-    setIsPlaying(!isPlaying);
-  };
+  const { audio, isPlaying, togglePlayback } = useGlobalAudio();
 
   if (!show) return null;
 
@@ -40,19 +18,13 @@ export default function LivePlayer() {
       <div className="absolute inset-0 bg-black/10 dark:bg-black/30 z-0" />
 
       <CardHeader className="relative z-10 space-y-2">
-        {/* Top row: Station Select + On Air */}
         <div className="flex items-center justify-between w-full">
-          {/* Station Select */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex items-center gap-1 truncate">
               <StationSelect />
             </div>
           </div>
-
-          {/* On Air Badge */}
-          <div className="inline-flex items-center bg-destructive text-white text-xs font-semibold rounded-md px-3 py-1 whitespace-nowrap">
-            ON AIR NOW
-          </div>
+          <Badge variant="destructive">ON AIR NOW</Badge>
         </div>
       </CardHeader>
 
@@ -65,7 +37,8 @@ export default function LivePlayer() {
           />
           <button
             onClick={togglePlayback}
-            className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg hover:bg-black/60 transition"
+            disabled={!audio}
+            className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg hover:bg-black/60 transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPlaying ? (
               <SquareIcon className="text-white w-9 h-9 fill-current" />
