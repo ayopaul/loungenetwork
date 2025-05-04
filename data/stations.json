@@ -1,13 +1,12 @@
 [
-    {
-      "id": "lounge877",
-      "name": "Lounge 87.7 FM",
-      "streamUrl": "https://lounge877fmlagos-atunwadigital.streamguys1.com/lounge877fmlagos"
-    },
-    {
-      "id": "rewind ",
-      "name": "Rewind FM",
-      "streamUrl": "https://example.com/cool-fm"
-    }
-  ]
-  
+  {
+    "id": "lounge877",
+    "name": "Lounge FM Abuja",
+    "streamUrl": "https://lounge877fmlagos-atunwadigital.streamguys1.com/lounge877fmlagos"
+  },
+  {
+    "id": "rewind ",
+    "name": "Lounge FM Benin",
+    "streamUrl": "https://example.com/cool-fm"
+  }
+]

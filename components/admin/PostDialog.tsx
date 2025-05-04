@@ -1,4 +1,6 @@
 // components/admin/PostDialog.tsx
+// the is the modal that contatins the new blog post fields
+
 "use client";
 
 import {
@@ -15,7 +17,7 @@ export default function PostDialog() {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="max-w-3xl bg-background text-foreground">
+      <DialogContent className="bg-background text-foreground max-w-3xl w-[90vw] sm:w-[80vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditMode ? "Edit Blog Post" : "Create New Post"}

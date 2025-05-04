@@ -1,69 +1,72 @@
-'use client';
+"use client";
 
 import * as React from "react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Option = {
+export type Option = {
   label: string;
   value: string;
 };
 
 type Props = {
   options: Option[];
-  selectedValues: string[];
+  selectedValues?: string[]; // ✅ now optional
   onChange: (values: string[]) => void;
   placeholder?: string;
 };
 
 export function MultiSelectCombobox({
   options,
-  selectedValues,
+  selectedValues = [], // ✅ default to empty array
   onChange,
-  placeholder = "Select options...",
+  placeholder = "Select options",
 }: Props) {
   const [open, setOpen] = React.useState(false);
 
-  const toggleValue = (value: string) => {
-    if (selectedValues.includes(value)) {
-      onChange(selectedValues.filter((v) => v !== value));
-    } else {
-      onChange([...selectedValues, value]);
-    }
-  };
+  function toggleSelection(value: string) {
+    const exists = selectedValues.includes(value);
+    const next = exists
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value];
+    onChange(next);
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
-          {selectedValues.length > 0 ? `${selectedValues.length} selected` : placeholder}
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+        >
+          {Array.isArray(selectedValues) && selectedValues.length > 0
+            ? `${selectedValues.length} selected`
+            : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="Search..." />
-          <CommandEmpty>No options found.</CommandEmpty>
           <CommandGroup>
             {options.map((option) => (
-              <CommandItem key={option.value} onSelect={() => toggleValue(option.value)}>
-                <div className="flex items-center gap-2">
-                  <Check className={cn("h-4 w-4", selectedValues.includes(option.value) ? "opacity-100" : "opacity-0")} />
-                  {option.label}
-                </div>
+              <CommandItem
+                key={option.value}
+                onSelect={() => toggleSelection(option.value)}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selectedValues.includes(option.value)
+                      ? "opacity-100"
+                      : "opacity-0"
+                  )}
+                />
+                {option.label}
               </CommandItem>
             ))}
           </CommandGroup>

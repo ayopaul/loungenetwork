@@ -22,9 +22,9 @@ export default function ScheduleCard({
   isLive = false,
 }: ScheduleCardProps) {
   return (
-    <div className="w-full max-w-[360px] mx-auto">
+    <div className="w-full h-full ">
       <Card
-        className={`relative overflow-hidden rounded-xl p-0 border border-white/10 transition duration-200 ${
+        className={`relative overflow-hidden h-full rounded-xl p-0 border border-neutral-200 dark:border-white/10 transition duration-200 ${
           isLive ? "ring-2 ring-red-500" : "hover:shadow-lg shadow-none"
         }`}
       >
@@ -55,7 +55,7 @@ export default function ScheduleCard({
               {startTime} – {endTime}
             </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{description}</p>
         </div>
       </Card>
     </div>

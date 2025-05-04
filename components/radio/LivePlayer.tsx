@@ -1,17 +1,19 @@
 "use client";
 
 import { useCurrentShow } from "@/hooks/useCurrentShow";
+import { useStationStore } from "@/stores/useStationStore";
 import { useGlobalAudio } from "@/stores/useGlobalAudio";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { PlayIcon, SquareIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "../ui/badge";
 import { StationSelect } from "@/components/station/StationSelect";
 
 export default function LivePlayer() {
+  const { selected } = useStationStore();
+  const { isPlaying, togglePlayback } = useGlobalAudio();
   const show = useCurrentShow();
-  const { audio, isPlaying, togglePlayback } = useGlobalAudio();
 
-  if (!show) return null;
+  if (!selected || !show) return null;
 
   return (
     <Card className="mt-8 sm:mt-6 relative overflow-hidden shadow-xl bg-background/80 backdrop-blur-md dark:bg-gradient-to-br dark:from-[#111] dark:to-[#222] text-foreground rounded-2xl">
@@ -24,7 +26,10 @@ export default function LivePlayer() {
               <StationSelect />
             </div>
           </div>
-          <Badge variant="destructive">ON AIR NOW</Badge>
+
+          <div className="inline-flex items-center bg-destructive text-white text-xs font-semibold rounded-md px-3 py-1 whitespace-nowrap">
+            ON AIR NOW
+          </div>
         </div>
       </CardHeader>
 
@@ -37,8 +42,8 @@ export default function LivePlayer() {
           />
           <button
             onClick={togglePlayback}
-            disabled={!audio}
-            className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg hover:bg-black/60 transition disabled:cursor-not-allowed disabled:opacity-50"
+            className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg hover:bg-black/60 transition"
+            aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
               <SquareIcon className="text-white w-9 h-9 fill-current" />

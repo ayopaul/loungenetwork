@@ -1,3 +1,6 @@
+//components/admin/BlogManager.tsx
+// this is used to control the listing of blog posts on the admin page 
+
 "use client";
 
 import { useEffect, useState } from "react";

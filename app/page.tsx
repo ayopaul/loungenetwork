@@ -1,3 +1,4 @@
+// app/page.tsx
 'use client';
 
 import { useEffect } from "react";
@@ -8,15 +9,14 @@ import WeeklyTabs from "@/components/schedule/WeeklyTabs";
 import { useStationStore } from "@/stores/useStationStore";
 import BlogByCategory from "@/components/blog/BlogByCategory";
 import AudioVisualizer from "@/components/radio/AudioVisualizer";
-import stations from "@/data/stations.json"; // assuming this file exists
+import stations from "@/data/stations.json";
 
 export default function HomePage() {
   const { selected, setSelected } = useStationStore();
 
-  // Select the first station as default if none is selected
   useEffect(() => {
     if (!selected && stations.length > 0) {
-      setSelected(stations[0]); // fallback to first station
+      setSelected(stations[0]);
     }
   }, [selected]);
 
@@ -25,15 +25,10 @@ export default function HomePage() {
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-10">
-        {/* Hero Section */}
         <section className="relative h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden rounded-2xl mb-12">
-          {/* Semi-transparent overlay */}
           <div className="absolute inset-0 bg-muted/70 backdrop-blur-sm z-10" />
+          <AudioVisualizer />
 
-          {/* Audio waveform */}
-          {selected && <AudioVisualizer />}
-
-          {/* Overlay content */}
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center h-full p-6 bg-muted/40 backdrop-blur-sm rounded-2xl">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome Home</h1>
@@ -50,14 +45,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Schedule Section */}
-        {selected && (
-          <section className="mb-20">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-              <WeeklyTabs />
-            </div>
-          </section>
-        )}
+        <section className="mb-20">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            {selected && <WeeklyTabs />}
+          </div>
+        </section>
 
         <div className="bg-[url('/bank-note.svg')] bg-cover" />
         <BlogByCategory limit={4} />

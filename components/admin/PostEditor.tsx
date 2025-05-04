@@ -1,3 +1,5 @@
+//components/admin/PostEditor
+// this controlds the editing of blog posts on the separate admin page
 "use client";
 
 import { useState } from "react";

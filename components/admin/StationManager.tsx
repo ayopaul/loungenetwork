@@ -1,3 +1,6 @@
+//components/admin/StationManager.tsx
+// this view is how the admin manages station from the admin view 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -5,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useStationAdminStore } from "@/stores/useStationAdminStore";
 import StationDialog from "./StationDialog";
+import { Separator } from "@/components/ui/separator"
 
 type Station = {
   id: string;
@@ -35,22 +39,31 @@ export default function StationManager() {
 
   return (
     <div className="space-y-6 bg-background text-foreground p-4 rounded-lg">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h2 className="text-xl font-semibold">Manage Stations</h2>
-        <Button onClick={() => openDialog()}>+ Add Station</Button>
+        <Button
+          onClick={() => openDialog()}
+          className="w-full sm:w-auto text-center"
+        >
+          + Add Station
+        </Button>
       </div>
+      <Separator className="my-4" />
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {stations.map((station) => (
-          <Card
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 w-full overflow-hidden">
+        
+          {stations.map((station) => (
+            <Card
             key={station.id}
-            className="p-4 cursor-pointer hover:bg-muted"
+            className="p-3 w-full rounded-lg shadow-sm hover:bg-muted transition-colors cursor-pointer "
             onClick={() => openDialog(station)}
           >
-            <h3 className="font-semibold">{station.name}</h3>
-            <p className="text-sm text-muted-foreground">{station.streamUrl}</p>
-          </Card>
-        ))}
+            <h3 className="font-semibold text-base leading-tight mb-1 break-words">
+              {station.name}
+            </h3>
+            <p className="text-sm text-muted-foreground break-all whitespace-normal"> {station.streamUrl} </p>
+          </Card>        
+          ))}
       </div>
 
       <StationDialog onSaved={triggerRefresh} />

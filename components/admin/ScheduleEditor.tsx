@@ -1,3 +1,6 @@
+//components/admin/ScheduleEditor.tsx
+// this page helps manage the show schedule 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -45,6 +48,13 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
       .then((data: ScheduleSlot[]) => setSchedule(data))
       .finally(() => setLoading(false));
   }, [station]);
+  useEffect(() => {
+    const activeTab = document.querySelector(`[data-state="active"]`);
+    if (activeTab) {
+      activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [activeDay]);
+  
 
   const updateSlot = (id: string, field: keyof ScheduleSlot, value: string) => {
     setSchedule(prev =>
@@ -94,13 +104,15 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
       <h2 className="text-lg font-semibold mb-4">Editing: {station.name}</h2>
 
       <Tabs defaultValue="0" className="w-full" onValueChange={setActiveDay}>
-        <TabsList className="mb-4 overflow-x-auto">
+      <div className="overflow-x-auto whitespace-nowrap mb-4 -mx-4 px-4 no-scrollbar">
+      <TabsList className="mb-4 overflow-x-auto whitespace-nowrap no-scrollbar">
           {weekdays.map(day => (
             <TabsTrigger key={day.value} value={day.value}>
               {day.label}
             </TabsTrigger>
           ))}
         </TabsList>
+        </div>
 
         {weekdays.map(day => {
           const daySlots = schedule.filter(slot => String(slot.weekday) === day.value);
@@ -130,6 +142,7 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
                           onChange={(e) => updateSlot(slot.id, "thumbnailUrl", e.target.value)}
                         />
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor={`start-${slot.id}`}>Start Time</Label>
                         <Input
@@ -148,6 +161,8 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
                           placeholder="e.g. 10:00"
                         />
                       </div>
+                    </div>
+
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={`desc-${slot.id}`}>Description</Label>

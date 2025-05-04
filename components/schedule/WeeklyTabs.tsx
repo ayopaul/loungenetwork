@@ -56,7 +56,7 @@ export default function WeeklyTabs() {
 
         return (
           <TabsContent key={day.value} value={day.value}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-center">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-0">
               {shows.map((slot) => {
                 const now = new Date();
                 const todayDay = now.getDay().toString(); // current day of week

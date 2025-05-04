@@ -1,8 +1,9 @@
+// components/admin/SettingsShell.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { SidebarNav } from "@/components/admin/SidebarNav"; // Make sure this exists
-import ThemeToggle from "@/components/admin/ThemeToggle"; // Make sure this exists
+import { SidebarNav } from "@/components/admin/SidebarNav";
+import ThemeToggle from "@/components/admin/ThemeToggle";
 
 interface NavItem {
   label: string;
@@ -32,28 +33,33 @@ export function SettingsShell({
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null; // or a skeleton loader
-  }
+  if (!mounted) return null;
 
   return (
-    <div className="space-y-6 p-10 pb-16 bg-background text-foreground min-h-screen">
-      <div className="flex justify-between items-start flex-wrap gap-4">
-        <div>
+    <div className="space-y-6 px-4 sm:px-6 lg:px-10 pb-16 bg-background text-foreground min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="sm:w-4/5">
           <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
           <p className="text-muted-foreground">{description}</p>
         </div>
-        <ThemeToggle />
+        <div className="sm:w-1/5 sm:flex sm:justify-end">
+          <ThemeToggle />
+        </div>
       </div>
+
 
       <hr className="border-t border-border" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      {/* Main content area */}
+      <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8">
+        {/* Sidebar */}
         <aside className="lg:col-span-1">
           <SidebarNav items={nav} current={current} onSelect={onSelect} />
         </aside>
 
-        <div className="lg:col-span-4">{children}</div>
+        {/* Content */}
+        <div className="lg:col-span-4 w-full">{children}</div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+// app/admin/page.tsx
 'use client';
 
 import { useEffect, useState } from "react";
@@ -5,8 +6,9 @@ import { SettingsShell } from "@/components/admin/SettingsShell";
 import ScheduleEditor from "@/components/admin/ScheduleEditor";
 import StationManager from "@/components/admin/StationManager";
 import BlogManager from "@/components/admin/BlogManager";
+import OAPManager from "@/components/admin/OAPManager";
 import { AdminAuthWrapper } from "@/components/admin/AdminAuthWrapper";
-import type { Station } from "@/types/types"; // ✅ import type
+import type { Station } from "@/types/types"; //  import type
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,13 +21,13 @@ import { Button } from "@/components/ui/button";
 
 export default function AdminSettingsPage() {
   const [stations, setStations] = useState<Station[]>([]);
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null); // ✅ Strict typing
-  const [section, setSection] = useState<'shows' | 'blog' | 'stations'>('shows');
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null); // Strict typing
+  const [section, setSection] = useState<"stations" | "shows" | "blog" | "team">("stations");
 
   useEffect(() => {
     async function fetchStations() {
       const res = await fetch("/api/stations");
-      const data: Station[] = await res.json(); // ✅ Cast it
+      const data: Station[] = await res.json(); //  Cast it
       setStations(data);
       setSelectedStation(data[0]);
     }
@@ -38,60 +40,72 @@ export default function AdminSettingsPage() {
 
   return (
     <AdminAuthWrapper>
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
-  
-        {/* Station Selector */}
-        <div className="sticky top-0 z-50 bg-background border-b p-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Admin Panel</h1>
-  
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="capitalize">
-                <p className="text-muted-foreground p-6"> Select station</p>{selectedStation.name}
-              </Button>
-            </DropdownMenuTrigger>
-  
-            <DropdownMenuContent align="end">
-              {stations.map((station) => (
-                <DropdownMenuItem
-                  key={station.id}
-                  onClick={() => setSelectedStation(station)}
-                  className="cursor-pointer capitalize"
-                >
-                  {station.name}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-  
-        {/* Settings */}
-        <SettingsShell
-          title="Settings"
-          description="Manage your station settings and set show preferences."
-          nav={[
-            { label: "Stations", value: "stations" },
-            { label: "Shows", value: "shows" },
-            { label: "Blog", value: "blog" },
-          ]}
-          current={section}
-          onSelect={(val: string) => setSection(val as 'shows' | 'blog' | 'stations')}
-        >
-          <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
-            {section === "shows" && (
-              <ScheduleEditor station={selectedStation} />
-            )}
-            {section === "blog" && (
-              <BlogManager station={selectedStation} />
-            )}
-            {section === "stations" && (
-              <StationManager />
-            )}
+      <div className="max-w-7xl mx-auto">
+        {/* Sticky Header */}
+          <div className="sticky top-0 z-50 bg-background border-b px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-start justify-between gap-4">
+              {/* Left: Title (60%) */}
+              <div className="w-full sm:w-3/5">
+                <h1 className="text-2xl font-bold">Admin Panel</h1>
+              </div>
+
+              {/* Right: Station Selector (40%) */}
+              <div className="w-full sm:w-2/5">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                  <Button
+                      variant="outline"
+                      className="w-full text-left text-sm p-6 flex flex-col items-start gap-0.5 whitespace-normal break-words leading-tight"
+                    >
+                      <span className="text-muted-foreground text-xs">Station:</span>
+                      <span className="font-medium capitalize break-words ">
+                        {selectedStation.name}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end">
+                    {stations.map((station) => (
+                      <DropdownMenuItem
+                        key={station.id}
+                        onClick={() => setSelectedStation(station)}
+                        className="cursor-pointer capitalize"
+                      >
+                        {station.name}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
-        </SettingsShell>
+
   
-      </div> {/* ✅ Correct closing */}
+        {/* Main Content */}
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <SettingsShell
+            title="Settings"
+            description="Manage your station settings and set show preferences."
+            nav={[
+              { label: "Stations", value: "stations" },
+              { label: "Shows", value: "shows" },
+              { label: "Blog", value: "blog" },
+              { label: "Team", value: "team" },
+            ]}
+            current={section}
+            onSelect={(val: string) => setSection(val as 'shows' | 'blog' | 'stations')}
+          >
+            <div className="min-h-[500px] p-4 bg-background text-foreground rounded-md">
+              {section === "shows" && <ScheduleEditor station={selectedStation} />}
+              {section === "blog" && <BlogManager station={selectedStation} />}
+              {section === "stations" && <StationManager />}
+              {section === "team" && <OAPManager station={selectedStation} />}
+            </div>
+          </SettingsShell>
+        </div>
+      </div>
     </AdminAuthWrapper>
   );
+  
   
 }

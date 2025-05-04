@@ -1,3 +1,7 @@
+// components/admin/PostForm.tsx
+// this controls the fields admin would use in creating a new content. the content is shown inside the PostDialog
+
+
 "use client";
 
 import { useEffect, useState } from "react";
