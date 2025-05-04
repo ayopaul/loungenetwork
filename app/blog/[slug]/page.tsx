@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import GlobalAudioPlayer from "@/components/player/GlobalAudioPlayer";
+// import GlobalAudioPlayer from "@/components/player/GlobalAudioProvider";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Metadata } from "next";
@@ -86,7 +86,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </article>
       </main>
 
-      <GlobalAudioPlayer />
+      {/* <GlobalAudioPlayer /> */}
     </>
   );
 }
