@@ -1,12 +1,17 @@
 [
   {
     "id": "lounge877",
-    "name": "Lounge FM Abuja",
+    "name": "Lagos",
     "streamUrl": "https://lounge877fmlagos-atunwadigital.streamguys1.com/lounge877fmlagos"
   },
   {
     "id": "rewind ",
-    "name": "Lounge FM Benin",
+    "name": "Benin",
     "streamUrl": "https://example.com/cool-fm"
+  },
+  {
+    "id": "abuja",
+    "name": "Abuja",
+    "streamUrl": "#"
   }
 ]

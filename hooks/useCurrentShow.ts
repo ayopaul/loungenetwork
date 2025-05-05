@@ -40,11 +40,11 @@ export function useCurrentShow(): Show | null {
         return currentMinutes >= start && currentMinutes < end;
       });
  // Optional: helpful logging if nothing is matched
-      if (!currentShow) {
-        console.log("⚠️ No current show found");
-        console.log("Time:", now.toLocaleTimeString(), "→", currentMinutes, "minutes");
-        console.log("Today's shows:", todayShows.map(s => `${s.showTitle} (${s.startTime}–${s.endTime})`));
-      }
+      // if (!currentShow) {
+      //   console.log("⚠️ No current show found");
+      //   console.log("Time:", now.toLocaleTimeString(), "→", currentMinutes, "minutes");
+      //   console.log("Today's shows:", todayShows.map(s => `${s.showTitle} (${s.startTime}–${s.endTime})`));
+      // }
 
       setCurrentShow(show || null);
     };

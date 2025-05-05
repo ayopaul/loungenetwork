@@ -35,10 +35,9 @@ export function StationSelect() {
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger
-          className="h-7 w-[160px] text-xs bg-background border border-border text-foreground rounded-md px-2 flex items-center justify-between truncate focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-primary/30 [&>span.select-trigger-icon]:hidden"
-        >
-          <div className="flex items-center gap-1 truncate">
+      <SelectTrigger className="h-7 w-[200px] text-xs bg-background border border-border text-foreground rounded-md px-2 flex items-center justify-between">
+            <div className="flex items-center gap-1 whitespace-nowrap">
+
             <span className="text-muted-foreground shrink-0">Station:</span>
             <SelectValue placeholder="Select a station" className="truncate" />
           </div>

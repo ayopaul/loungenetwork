@@ -1,4 +1,5 @@
 // components/layout/Navbar.tsx
+// components/layout/Navbar.tsx
 import Link from "next/link";
 import ThemeToggle from "../admin/ThemeToggle";
 
@@ -10,11 +11,18 @@ export default function Navbar() {
           Lounge Network
         </Link>
 
-        <ul className="flex gap-4 text-sm items-center">
+        <ul className="flex gap-6 text-sm items-center">
           <li>
-            <a href="#schedule" className="hover:underline">Schedule</a>
+            <Link href="/blog" className="hover:underline">Blog</Link>
           </li>
-         
+          <li>
+            <Link href="/team" className="hover:underline">OAPs</Link>
+          </li>
+          <li>
+            <Link href="/about" className="hover:underline">About</Link>
+          </li>
+          
+
           <ThemeToggle />
         </ul>
       </div>

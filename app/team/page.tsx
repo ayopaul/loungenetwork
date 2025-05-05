@@ -1,3 +1,5 @@
+// app/team/page.tsx
+
 'use client';
 
 import { useEffect, useState } from "react";
@@ -42,7 +44,7 @@ export default function TeamPage() {
     }
 
     async function fetchShows() {
-      const res = await fetch("/api/schedules?stationId=lounge877");
+      const res = await fetch("/api/schedule?stationId=lounge877");
       const data = await res.json();
       setShows(data.map((s: any) => ({
         id: s.id,
@@ -65,10 +67,9 @@ export default function TeamPage() {
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-10">
         <div className="text-center mb-12">
-          <p className="text-primary uppercase mb-2 tracking-widest font-semibold">We're hiring</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Meet our team</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Meet our presenters</h1>
           <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-            The voices and talents behind Lounge 87.7 FM
+            The voices and talents behind Lounge Network
           </p>
         </div>
 
