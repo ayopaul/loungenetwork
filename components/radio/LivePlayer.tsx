@@ -15,11 +15,12 @@ export default function LivePlayer() {
   if (!selected || !show) return null;
 
   return (
-    <Card className="bg-background/70 backdrop-blur-md border border-border text-foreground shadow-md rounded-2xl">
+    <Card className="bg-card text-foreground border border-border shadow-sm rounded-2xl">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <StationSelect />
-          <span className="bg-red-500 text-white text-xs font-bold rounded-md px-3 py-1">
+
+          <span className="bg-red-500 text-white text-xs font-medium rounded-md px-3 py-1">
             ON AIR NOW
           </span>
         </div>
@@ -38,9 +39,9 @@ export default function LivePlayer() {
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <SquareIcon className="text-white w-8 h-8" />
+              <SquareIcon className="text-white w-8 h-8 fill-white" />
             ) : (
-              <PlayIcon className="text-white w-8 h-8" />
+              <PlayIcon className="text-white w-8 h-8 fill-white" />
             )}
           </button>
         </div>
