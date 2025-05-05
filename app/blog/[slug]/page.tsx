@@ -47,7 +47,14 @@ async function getPostBySlug(slug: string): Promise<Post | null> {
   return null;
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+type PageProps = {
+  params: {
+    slug: string
+  }
+}
+
+export default async function BlogPostPage({ params }: PageProps)
+ {
   const post = await getPostBySlug(params.slug);
   if (!post || !post.published) return notFound();
 
