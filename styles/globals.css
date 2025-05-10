@@ -75,3 +75,11 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+h1 {
+  font-size: 2.25rem; /* equivalent to text-4xl */
+  font-weight: 700;   /* equivalent to font-bold */
+  background: linear-gradient(to right, #ea001d, rgb(247, 3, 12));
+  -webkit-background-clip: text;
+  color: transparent;
+}

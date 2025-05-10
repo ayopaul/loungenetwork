@@ -18,8 +18,8 @@ export const AuroraBackground = ({
   const isDark = resolvedTheme === "dark";
 
   const gradient = isDark
-    ? "repeating-linear-gradient(100deg, #7928ca 10%, #2d2a55 15%, #3b0764 20%, #1f2937 25%, #4c1d95 30%)"
-    : "repeating-linear-gradient(100deg, #3b82f6 10%, #a5b4fc 15%, #93c5fd 20%, #ddd6fe 25%, #60a5fa 30%)";
+    ? "repeating-linear-gradient(100deg, #ff0034 10%, #fe51ba 15%, #ff825d 20%, #b50418 25%,rgb(196, 7, 7) 30%)"
+    : "repeating-linear-gradient(100deg, #ff0034 10%,rgb(255, 79, 3) 15%, #f03d9a 20%, #fa010b 25%, #ff0034 30%)";
 
   return (
     <main>

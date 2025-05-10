@@ -1,223 +1,210 @@
-  // app/admin/team/page.tsx
+// app/team/page.tsx – drop‑in replacement
 
 'use client';
-import { MultiSelectCombobox } from "@/components/shared/MultiSelectCombobox";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
+import { useEffect, useState } from 'react';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerDescription,
   DrawerTrigger,
   DrawerClose,
-} from "@/components/ui/drawer";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
 
-type OAP = {
+/** Types shared with the admin screen (consider extracting to a shared file) */
+interface OAP {
   id: string;
   name: string;
   role: string;
   bio: string;
   photoUrl: string;
-  showSlugs: string[];
-};
+  showSlugs: string[]; // IDs of the shows this presenter hosts
+}
 
-const defaultOAP: OAP = {
-  id: "",
-  name: "",
-  role: "",
-  bio: "",
-  photoUrl: "",
-  showSlugs: [],
-};
+interface Show {
+  id: string;
+  title: string;
+  thumbnailUrl?: string;
+}
 
-export default function AdminTeamPage() {
+export default function TeamPage() {
   const [oaps, setOaps] = useState<OAP[]>([]);
+  const [shows, setShows] = useState<Show[]>([]);
   const [selectedOAP, setSelectedOAP] = useState<OAP | null>(null);
-  const [newOAP, setNewOAP] = useState<OAP | null>(null);
-  const [allShows, setAllShows] = useState<{ id: string; title: string }[]>([]);
 
+  /**
+   * Fetch presenters and schedule in parallel.
+   * If either request fails we log the error – you could surface a toast or skeleton here instead.
+   */
   useEffect(() => {
-    async function fetchOAPs() {
+    async function loadData() {
       try {
-        const res = await fetch("/api/oaps");
-        const data = await res.json();
-        setOaps(data);
-      } catch (error) {
-        console.error("Failed to fetch OAPs:", error);
+        const [oapRes, showRes] = await Promise.all([
+          fetch('/api/oaps'),
+          // NOTE: 🔑 switched to the plural route so we actually hit the endpoint
+          fetch('/api/schedule?stationId=lounge877'),
+        ]);
+
+        if (!oapRes.ok || !showRes.ok) {
+          throw new Error('One or more requests failed');
+        }
+
+        const [oapData, showData] = await Promise.all([
+          oapRes.json(),
+          showRes.json(),
+        ]);
+
+        setOaps(oapData);
+        setShows(
+          showData.map((s: any) => ({
+            id: s.id,
+            title: s.showTitle,
+            thumbnailUrl: s.thumbnailUrl,
+          })) as Show[],
+        );
+      } catch (err) {
+        console.error('Failed to load team page data', err);
       }
     }
 
-    async function fetchShows() {
-      try {
-        const res = await fetch("/api/schedules?stationId=lounge877");
-        const data = await res.json();
-        const formatted = data.map((s: any) => ({ id: s.id, title: s.showTitle }));
-        setAllShows(formatted);
-      } catch (error) {
-        console.error("Failed to fetch shows:", error);
-      }
-    }
-
-    fetchOAPs();
-    fetchShows();
+    loadData();
   }, []);
 
-  function handleInputChange(field: keyof OAP, value: string) {
-    if (selectedOAP) {
-      setSelectedOAP({ ...selectedOAP, [field]: value });
-    }
-  }
-
-  async function saveOAPs(updated: OAP[]) {
-    try {
-      const res = await fetch("/api/oaps/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updated),
-      });
-      if (!res.ok) throw new Error("Failed to save OAPs");
-      setOaps(updated);
-
-      toast.success("Changes saved", {
-        description: "The team member updates have been saved successfully!",
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Save failed", {
-        description: "There was a problem saving the changes.",
-      });
-    }
-  }
-
-  function saveEditedOAP() {
-    if (!selectedOAP) return;
-    const updated = oaps.map((oap) => (oap.id === selectedOAP.id ? selectedOAP : oap));
-    saveOAPs(updated);
-    setSelectedOAP(null);
-  }
-
-  function deleteOAP(id: string) {
-    const updated = oaps.filter((oap) => oap.id !== id);
-    saveOAPs(updated);
-  }
-
-  function addNewOAP() {
-    if (!newOAP) return;
-    const updated = [...oaps, { ...newOAP, id: Date.now().toString() }];
-    saveOAPs(updated);
-    setNewOAP(null);
-  }
+  const getShowsForOAP = (oap: OAP): Show[] =>
+    oap.showSlugs
+      .map((slug) => shows.find((s) => s.id === slug))
+      .filter((s): s is Show => Boolean(s));
 
   return (
-    <div className="p-10 space-y-10">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Manage Team Members</h1>
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Navbar />
+      <main className="flex-grow container mx-auto px-4 py-10">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Meet our presenters</h1>
+          <p className="text-muted-foreground text-base max-w-2xl mx-auto">
+            The voices and talents behind Lounge Network Lagos
+          </p>
+        </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add New OAP</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add New OAP</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <Input placeholder="Name" onChange={(e) => setNewOAP({ ...(newOAP || defaultOAP), name: e.target.value })} />
-              <Input placeholder="Role" onChange={(e) => setNewOAP({ ...(newOAP || defaultOAP), role: e.target.value })} />
-              <Textarea placeholder="Bio" onChange={(e) => setNewOAP({ ...(newOAP || defaultOAP), bio: e.target.value })} />
-              <Input placeholder="Photo URL" onChange={(e) => setNewOAP({ ...(newOAP || defaultOAP), photoUrl: e.target.value })} />
-              <MultiSelectCombobox
-                options={allShows.map((show) => ({ label: show.title, value: show.id }))}
-                selectedValues={newOAP?.showSlugs || []}
-                onChange={(values: string[]) =>
-                  setNewOAP({ ...(newOAP || defaultOAP), showSlugs: values })
-                }
-              />
-              <Button onClick={addNewOAP}>Save</Button>
-            </div>
-
-            <DialogClose asChild>
-              <Button variant="outline" className="mt-4 w-full">
-                Cancel
-              </Button>
-            </DialogClose>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {oaps.map((oap) => (
-          <Drawer key={oap.id}>
-            <DrawerTrigger asChild>
-              <div
-                onClick={() => setSelectedOAP(oap)}
-                className="p-6 bg-muted/50 dark:bg-muted/30 rounded-xl cursor-pointer flex flex-col items-center text-center"
-              >
-                <div className="w-20 h-20 mb-4 overflow-hidden rounded-full bg-muted">
-                  <img src={oap.photoUrl} alt={oap.name} className="object-cover w-full h-full" />
-                </div>
-                <h2 className="font-semibold">{oap.name}</h2>
-                <p className="text-muted-foreground text-sm">{oap.role}</p>
-              </div>
-            </DrawerTrigger>
-
-            <DrawerContent className="h-1/2 w-full rounded-t-xl p-6 overflow-y-auto">
-              <DrawerHeader className="text-center relative">
-                <DrawerClose asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-4 top-4 text-muted-foreground"
-                  >
-                    ✕
-                  </Button>
-                </DrawerClose>
-
-                {selectedOAP && (
-                  <div className="flex flex-col gap-4 mt-6">
-                    <Label>Name</Label>
-                    <Input value={selectedOAP.name} onChange={(e) => handleInputChange("name", e.target.value)} />
-                    <Label>Role</Label>
-                    <Input value={selectedOAP.role} onChange={(e) => handleInputChange("role", e.target.value)} />
-                    <Label>Bio</Label>
-                    <Textarea value={selectedOAP.bio} onChange={(e) => handleInputChange("bio", e.target.value)} />
-                    <Label>Photo URL</Label>
-                    <Input value={selectedOAP.photoUrl} onChange={(e) => handleInputChange("photoUrl", e.target.value)} />
-                    <Label>Assign Shows</Label>
-                    <MultiSelectCombobox
-                      options={allShows.map((show) => ({ label: show.title, value: show.id }))}
-                      selectedValues={selectedOAP.showSlugs}
-                      onChange={(values: string[]) =>
-                        setSelectedOAP({ ...selectedOAP, showSlugs: values })
-                      }
-                    />
-                    <div className="flex gap-2 mt-4">
-                      <Button onClick={saveEditedOAP}>Save Changes</Button>
-                      <Button variant="destructive" onClick={() => deleteOAP(selectedOAP.id)}>
-                        Delete
-                      </Button>
-                    </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {oaps.map((oap) => (
+            <Drawer key={oap.id}>
+              <DrawerTrigger asChild>
+                <div
+                  onClick={() => setSelectedOAP(oap)}
+                  className="flex flex-col items-center bg-muted/50 dark:bg-muted/40 rounded-xl p-6 text-center transition hover:scale-105 hover:shadow-md cursor-pointer"
+                >
+                  <div className="w-24 h-24 mb-4 overflow-hidden rounded-full bg-muted">
+                    <img src={oap.photoUrl} alt={oap.name} className="object-cover w-full h-full" />
                   </div>
-                )}
-              </DrawerHeader>
-            </DrawerContent>
-          </Drawer>
-        ))}
-      </div>
+                  <h2 className="text-lg font-semibold">{oap.name}</h2>
+                  <p className="text-sm text-muted-foreground">{oap.role}</p>
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{oap.bio}</p>
+
+                  {/* Social Links – placeholder*/}
+                  <div className="mt-6 flex gap-6 text-gray-600 dark:text-gray-400">
+                    <a
+                      href="https://x.com"
+                      target="_blank"
+                      aria-label="X"
+                      className="hover:text-foreground dark:hover:text-foreground"
+                    >
+                      <i className="ri-twitter-x-line text-2xl" />
+                    </a>
+                    <a
+                      href="https://instagram.com"
+                      target="_blank"
+                      aria-label="Instagram"
+                      className="hover:text-foreground dark:hover:text-foreground"
+                    >
+                      <i className="ri-instagram-line text-2xl" />
+                    </a>
+                    <a
+                      href="https://youtube.com"
+                      target="_blank"
+                      aria-label="YouTube"
+                      className="hover:text-foreground dark:hover:text-foreground"
+                    >
+                      <i className="ri-youtube-line text-2xl" />
+                    </a>
+                  </div>
+                </div>
+              </DrawerTrigger>
+
+              <DrawerContent className="w-full h-1/2 rounded-t-xl p-6">
+                <DrawerHeader className="text-center relative">
+                  <DrawerClose asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-4 top-4 text-muted-foreground"
+                    >
+                      ✕
+                    </Button>
+                  </DrawerClose>
+
+                  {selectedOAP && (
+                    <>
+                      <div className="flex flex-col items-center space-y-2 mt-4">
+                        <div className="w-24 h-24 rounded-full overflow-hidden bg-muted">
+                          <img
+                            src={selectedOAP.photoUrl}
+                            alt={selectedOAP.name}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                        <DrawerTitle className="text-2xl text-foreground">
+                          {selectedOAP.name}
+                        </DrawerTitle>
+                        <DrawerDescription className="text-muted-foreground">
+                          {selectedOAP.role}
+                        </DrawerDescription>
+                      </div>
+                      <div className="mt-6 text-sm text-muted-foreground px-4">
+                        {selectedOAP.bio}
+                      </div>
+                      <div className="mt-4 px-4">
+                        <h3 className="text-primary font-semibold mb-2">Shows:</h3>
+                        {getShowsForOAP(selectedOAP).length > 0 ? (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {getShowsForOAP(selectedOAP).map((show) => (
+                              <div
+                                key={show.id}
+                                className="flex items-center gap-4 rounded-md border p-2 bg-muted/30"
+                              >
+                                <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
+                                  <img
+                                    src={show.thumbnailUrl}
+                                    alt={show.title}
+                                    className="object-cover w-full h-full"
+                                  />
+                                </div>
+                                <div className="text-sm font-medium text-foreground">
+                                  {show.title}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">
+                            No shows assigned yet.
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </DrawerHeader>
+              </DrawerContent>
+            </Drawer>
+          ))}
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

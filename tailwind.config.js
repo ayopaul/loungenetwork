@@ -19,9 +19,11 @@ module.exports = {
 		
 		colors: {
 		  colors: {
-			primary: '#ffffff',
-			secondary: '#f8f9fa',
-			accent: '#ff2e63',
+			brandRed: '#ea001d',
+        	brandAccent: 'rgb(247,3,12)', // From srgb 0.9702 0.012 0.0473
+			primary: '#bd0922',
+			secondary: '#fe58ad',
+			accent: '#ff825d',
 		  },
 		  background: 'hsl(var(--background))',
 		  foreground: 'hsl(var(--foreground))',

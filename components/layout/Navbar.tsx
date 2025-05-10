@@ -4,12 +4,18 @@
 import Link from "next/link";
 import { MenuIcon } from "lucide-react";
 import ThemeToggle from "../admin/ThemeToggle";
+import ShowSearchDialog from "@/components/shared/ShowSearchDialog";
+import schedules from "@/data/schedules.json";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import SearchInput from "@/components/shared/SearchInput";
+
+
+const allShows = Object.values(schedules).flat()
 
 export default function Navbar() {
   return (
@@ -29,6 +35,9 @@ export default function Navbar() {
           </li>
           <li>
             <Link href="/about" className="hover:underline">About</Link>
+          </li>
+          <li>
+          <ShowSearchDialog shows={allShows} />
           </li>
           <li>
             <ThemeToggle />
@@ -54,10 +63,15 @@ export default function Navbar() {
               <DropdownMenuItem asChild>
                 <Link href="/about">About</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+              <ShowSearchDialog shows={allShows} />
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
         </div>
       </div>
+ 
     </nav>
   );
 }

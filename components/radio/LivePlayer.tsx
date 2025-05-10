@@ -15,12 +15,12 @@ export default function LivePlayer() {
   if (!selected || !show) return null;
 
   return (
-    <Card className="bg-card text-foreground border border-border shadow-sm rounded-2xl">
+    <Card className="bg-gradient-to-br from-[#ea001d] via-[#ff5858] to-[#ea001d] text-white shadow-lg rounded-2xl border-0">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <StationSelect />
 
-          <span className="bg-red-500 text-white text-xs font-medium rounded-md px-3 py-1">
+          <span className="bg-red-500 text-white text-xs font-medium rounded-md px-2.5 py-1 whitespace-nowrap">
             ON AIR NOW
           </span>
         </div>
@@ -48,8 +48,8 @@ export default function LivePlayer() {
 
         <div className="space-y-1 overflow-hidden">
           <p className="text-lg font-semibold truncate">{show.showTitle}</p>
-          <p className="text-sm text-muted-foreground truncate">{show.description}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-white/70 truncate">{show.description}</p>
+          <p className="text-xs text-white/60">
             {show.startTime} – {show.endTime}
           </p>
         </div>

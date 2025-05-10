@@ -1,393 +1,436 @@
 {
-    "lounge877": [
-      {
-        "id": "sun-1",
-        "showTitle": "Sunday Breeze",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Smooth morning vibes.",
-        "thumbnailUrl": "/thumbnails/sunday-breeze.png",
-        "weekday": 0
-      },
-      {
-        "id": "sun-2",
-        "showTitle": "Lets Chill",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Relaxed afternoon playlists.",
-        "thumbnailUrl": "/thumbnails/lets-chill.png",
-        "weekday": 0
-      },
-      {
-        "id": "sun-3",
-        "showTitle": "Brunch Nites",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening drive sounds.",
-        "thumbnailUrl": "/thumbnails/brunch-nites.png",
-        "weekday": 0
-      },
-      {
-        "id": "sun-4",
-        "showTitle": "Rhythm & Soul",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Classic and neo soul sessions.",
-        "thumbnailUrl": "/thumbnails/rhythm-soul.png",
-        "weekday": 0
-      },
-      {
-        "id": "sun-5",
-        "showTitle": "Sunday Night Soiree",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Late night chill zone.",
-        "thumbnailUrl": "/thumbnails/sunday-night.png",
-        "weekday": 0
-      },
-      {
-        "id": "sun-6",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 0
-      },
-      {
-        "id": "power-up-1",
-        "showTitle": "Power Up",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Your weekday starter.",
-        "thumbnailUrl": "/thumbnails/power-up.png",
-        "weekday": 1
-      },
-      {
-        "id": "lazy-lounge-1",
-        "showTitle": "Lazy Lounge",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Midday mellow mood.",
-        "thumbnailUrl": "/thumbnails/lazy-lounge.png",
-        "weekday": 1
-      },
-      {
-        "id": "bumper-1",
-        "showTitle": "Bumper 2 Bumper",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening rush tunes.",
-        "thumbnailUrl": "/thumbnails/bumper.png",
-        "weekday": 1
-      },
-      {
-        "id": "night-1",
-        "showTitle": "Night Lounge",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Unwind with smooth vibes.",
-        "thumbnailUrl": "/thumbnails/night-lounge.png",
-        "weekday": 1
-      },
-      {
-        "id": "power-down-1",
-        "showTitle": "Power Down",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Wind down sessions.",
-        "thumbnailUrl": "/thumbnails/power-down.png",
-        "weekday": 1
-      },
-      {
-        "id": "music-1",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 1
-      },
-      {
-        "id": "power-up-2",
-        "showTitle": "Power Up",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Your weekday starter.",
-        "thumbnailUrl": "/thumbnails/power-up.png",
-        "weekday": 2
-      },
-      {
-        "id": "lazy-lounge-2",
-        "showTitle": "Lazy Lounge",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Midday mellow mood.",
-        "thumbnailUrl": "/thumbnails/lazy-lounge.png",
-        "weekday": 2
-      },
-      {
-        "id": "bumper-2",
-        "showTitle": "Bumper 2 Bumper",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening rush tunes.",
-        "thumbnailUrl": "/thumbnails/bumper.png",
-        "weekday": 2
-      },
-      {
-        "id": "night-2",
-        "showTitle": "Night Lounge",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Unwind with smooth vibes.",
-        "thumbnailUrl": "/thumbnails/night-lounge.png",
-        "weekday": 2
-      },
-      {
-        "id": "power-down-2",
-        "showTitle": "Power Down",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Wind down sessions.",
-        "thumbnailUrl": "/thumbnails/power-down.png",
-        "weekday": 2
-      },
-      {
-        "id": "music-2",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 2
-      },
-      {
-        "id": "power-up-3",
-        "showTitle": "Power Up",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Your weekday starter.",
-        "thumbnailUrl": "/thumbnails/power-up.png",
-        "weekday": 3
-      },
-      {
-        "id": "lazy-lounge-3",
-        "showTitle": "Lazy Lounge",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Midday mellow mood.",
-        "thumbnailUrl": "/thumbnails/lazy-lounge.png",
-        "weekday": 3
-      },
-      {
-        "id": "bumper-3",
-        "showTitle": "Bumper 2 Bumper",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening rush tunes.",
-        "thumbnailUrl": "/thumbnails/bumper.png",
-        "weekday": 3
-      },
-      {
-        "id": "night-3",
-        "showTitle": "Night Lounge",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Unwind with smooth vibes.",
-        "thumbnailUrl": "/thumbnails/night-lounge.png",
-        "weekday": 3
-      },
-      {
-        "id": "power-down-3",
-        "showTitle": "Power Down",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Wind down sessions.",
-        "thumbnailUrl": "/thumbnails/power-down.png",
-        "weekday": 3
-      },
-      {
-        "id": "music-3",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 3
-      },
-      {
-        "id": "power-up-4",
-        "showTitle": "Power Up",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Your weekday starter.",
-        "thumbnailUrl": "/thumbnails/power-up.png",
-        "weekday": 4
-      },
-      {
-        "id": "lazy-lounge-4",
-        "showTitle": "Lazy Lounge",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Midday mellow mood.",
-        "thumbnailUrl": "/thumbnails/lazy-lounge.png",
-        "weekday": 4
-      },
-      {
-        "id": "bumper-4",
-        "showTitle": "Bumper 2 Bumper",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening rush tunes.",
-        "thumbnailUrl": "/thumbnails/bumper.png",
-        "weekday": 4
-      },
-      {
-        "id": "night-4",
-        "showTitle": "Night Lounge",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Unwind with smooth vibes.",
-        "thumbnailUrl": "/thumbnails/night-lounge.png",
-        "weekday": 4
-      },
-      {
-        "id": "power-down-4",
-        "showTitle": "Power Down",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Wind down sessions.",
-        "thumbnailUrl": "/thumbnails/power-down.png",
-        "weekday": 4
-      },
-      {
-        "id": "music-4",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 4
-      },
-      {
-        "id": "power-up-5",
-        "showTitle": "Power Up",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Your weekday starter.",
-        "thumbnailUrl": "/thumbnails/power-up.png",
-        "weekday": 5
-      },
-      {
-        "id": "lazy-lounge-5",
-        "showTitle": "Lazy Lounge",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Midday mellow mood.",
-        "thumbnailUrl": "/thumbnails/lazy-lounge.png",
-        "weekday": 5
-      },
-      {
-        "id": "bumper-5",
-        "showTitle": "Bumper 2 Bumper",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Evening rush tunes.",
-        "thumbnailUrl": "/thumbnails/bumper.png",
-        "weekday": 5
-      },
-      {
-        "id": "night-5",
-        "showTitle": "Night Lounge",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Unwind with smooth vibes.",
-        "thumbnailUrl": "/thumbnails/night-lounge.png",
-        "weekday": 5
-      },
-      {
-        "id": "power-down-5",
-        "showTitle": "Power Down",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Wind down sessions.",
-        "thumbnailUrl": "/thumbnails/power-down.png",
-        "weekday": 5
-      },
-      {
-        "id": "music-5",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 5
-      },
-      {
-        "id": "sat-1",
-        "showTitle": "Zen Lounge",
-        "startTime": "06:00",
-        "endTime": "11:00",
-        "description": "Weekend wind-in and relaxation.",
-        "thumbnailUrl": "/thumbnails/zen.png",
-        "weekday": 6
-      },
-      {
-        "id": "sat-2",
-        "showTitle": "The Catch Up",
-        "startTime": "12:00",
-        "endTime": "16:00",
-        "description": "Weekend replay zone.",
-        "thumbnailUrl": "/thumbnails/catch-up.png",
-        "weekday": 6
-      },
-      {
-        "id": "sat-3",
-        "showTitle": "The Drift",
-        "startTime": "16:00",
-        "endTime": "20:00",
-        "description": "Saturdays with soul and groove.",
-        "thumbnailUrl": "/thumbnails/drift.png",
-        "weekday": 6
-      },
-      {
-        "id": "sat-4",
-        "showTitle": "On The Rocks",
-        "startTime": "20:00",
-        "endTime": "00:00",
-        "description": "Turn-up with bold mixes.",
-        "thumbnailUrl": "/thumbnails/on-the-rocks.png",
-        "weekday": 6
-      },
-      {
-        "id": "sat-5",
-        "showTitle": "Saturday Night Soiree",
-        "startTime": "00:00",
-        "endTime": "05:00",
-        "description": "Party through the midnight hour.",
-        "thumbnailUrl": "/thumbnails/saturday-soiree.png",
-        "weekday": 6
-      },
-      {
-        "id": "sat-6",
-        "showTitle": "Music",
-        "startTime": "05:00",
-        "endTime": "06:00",
-        "description": "Continuous streaming music.",
-        "thumbnailUrl": "/thumbnails/music.png",
-        "weekday": 6
-      }
-    ],
-    "coolfm": [
-      {
-        "id": "cool-sun-1",
-        "showTitle": "Cool Sunday",
-        "startTime": "08:00",
-        "endTime": "12:00",
-        "description": "Cool R&B vibes.",
-        "thumbnailUrl": "/thumbnails/cool-sunday.png",
-        "weekday": 0
-      }
-    ]
-  }  
+  "lounge877": [
+    {
+      "id": "sun-1",
+      "showTitle": "Sunday Breeze",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Smooth morning vibes.",
+      "thumbnailUrl": "/thumbnails/sunday-breeze.png",
+      "weekday": 0,
+      "slug": "sunday-breeze"
+    },
+    {
+      "id": "sun-2",
+      "showTitle": "Lets Chill",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Relaxed afternoon playlists.",
+      "thumbnailUrl": "/thumbnails/lets-chill.png",
+      "weekday": 0,
+      "slug": "lets-chill"
+    },
+    {
+      "id": "sun-3",
+      "showTitle": "Brunch Nites",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening drive sounds.",
+      "thumbnailUrl": "/thumbnails/brunch-nites.png",
+      "weekday": 0,
+      "slug": "brunch-nites"
+    },
+    {
+      "id": "sun-4",
+      "showTitle": "Rhythm & Soul",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Classic and neo soul sessions.",
+      "thumbnailUrl": "/thumbnails/rhythm-soul.png",
+      "weekday": 0,
+      "slug": "rhythm--soul"
+    },
+    {
+      "id": "sun-5",
+      "showTitle": "Sunday Night Soiree",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Late night chill zone.",
+      "thumbnailUrl": "/thumbnails/sunday-night.png",
+      "weekday": 0,
+      "slug": "sunday-night-soiree"
+    },
+    {
+      "id": "sun-6",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 0,
+      "slug": "sun-6"
+    },
+    {
+      "id": "power-up-1",
+      "showTitle": "Power Up",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Your weekday starter.",
+      "thumbnailUrl": "/thumbnails/power-up.png",
+      "weekday": 1,
+      "slug": "power-up"
+    },
+    {
+      "id": "lazy-lounge-1",
+      "showTitle": "Lazy Lounge",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Midday mellow mood.",
+      "thumbnailUrl": "/thumbnails/lazy-lounge.png",
+      "weekday": 1,
+      "slug": "lazy-lounge"
+    },
+    {
+      "id": "bumper-1",
+      "showTitle": "Bumper 2 Bumper",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening rush tunes.",
+      "thumbnailUrl": "/thumbnails/bumper.png",
+      "weekday": 1,
+      "slug": "bumper-2-bumper"
+    },
+    {
+      "id": "night-1",
+      "showTitle": "Night Lounge",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Unwind with smooth vibes.",
+      "thumbnailUrl": "/thumbnails/night-lounge.png",
+      "weekday": 1,
+      "slug": "night-lounge"
+    },
+    {
+      "id": "power-down-1",
+      "showTitle": "Power Down",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Wind down sessions.",
+      "thumbnailUrl": "/thumbnails/power-down.png",
+      "weekday": 1,
+      "slug": "power-down"
+    },
+    {
+      "id": "music-1",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 1,
+      "slug": "music-1"
+    },
+    {
+      "id": "power-up-2",
+      "showTitle": "Power Up",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Your weekday starter.",
+      "thumbnailUrl": "/thumbnails/power-up.png",
+      "weekday": 2,
+      "slug": "power-up"
+    },
+    {
+      "id": "lazy-lounge-2",
+      "showTitle": "Lazy Lounge",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Midday mellow mood.",
+      "thumbnailUrl": "/thumbnails/lazy-lounge.png",
+      "weekday": 2,
+      "slug": "lazy-lounge"
+    },
+    {
+      "id": "bumper-2",
+      "showTitle": "Bumper 2 Bumper",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening rush tunes.",
+      "thumbnailUrl": "/thumbnails/bumper.png",
+      "weekday": 2,
+      "slug": "bumper-2-bumper"
+    },
+    {
+      "id": "night-2",
+      "showTitle": "Night Lounge",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Unwind with smooth vibes.",
+      "thumbnailUrl": "/thumbnails/night-lounge.png",
+      "weekday": 2,
+      "slug": "night-lounge"
+    },
+    {
+      "id": "power-down-2",
+      "showTitle": "Power Down",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Wind down sessions.",
+      "thumbnailUrl": "/thumbnails/power-down.png",
+      "weekday": 2,
+      "slug": "power-down"
+    },
+    {
+      "id": "music-2",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 2,
+      "slug": "music-2"
+    },
+    {
+      "id": "power-up-3",
+      "showTitle": "Power Up",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Your weekday starter.",
+      "thumbnailUrl": "/thumbnails/power-up.png",
+      "weekday": 3,
+      "slug": "power-up"
+    },
+    {
+      "id": "lazy-lounge-3",
+      "showTitle": "Lazy Lounge",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Midday mellow mood.",
+      "thumbnailUrl": "/thumbnails/lazy-lounge.png",
+      "weekday": 3,
+      "slug": "lazy-lounge"
+    },
+    {
+      "id": "bumper-3",
+      "showTitle": "Bumper 2 Bumper",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening rush tunes.",
+      "thumbnailUrl": "/thumbnails/bumper.png",
+      "weekday": 3,
+      "slug": "bumper-2-bumper"
+    },
+    {
+      "id": "night-3",
+      "showTitle": "Night Lounge",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Unwind with smooth vibes.",
+      "thumbnailUrl": "/thumbnails/night-lounge.png",
+      "weekday": 3,
+      "slug": "night-lounge"
+    },
+    {
+      "id": "power-down-3",
+      "showTitle": "Power Down",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Wind down sessions.",
+      "thumbnailUrl": "/thumbnails/power-down.png",
+      "weekday": 3,
+      "slug": "power-down"
+    },
+    {
+      "id": "music-3",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 3,
+      "slug": "music-3"
+    },
+    {
+      "id": "power-up-4",
+      "showTitle": "Power Up",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Your weekday starter.",
+      "thumbnailUrl": "/thumbnails/power-up.png",
+      "weekday": 4,
+      "slug": "power-up"
+    },
+    {
+      "id": "lazy-lounge-4",
+      "showTitle": "Lazy Lounge",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Midday mellow mood.",
+      "thumbnailUrl": "/thumbnails/lazy-lounge.png",
+      "weekday": 4,
+      "slug": "lazy-lounge"
+    },
+    {
+      "id": "bumper-4",
+      "showTitle": "Bumper 2 Bumper",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening rush tunes.",
+      "thumbnailUrl": "/thumbnails/bumper.png",
+      "weekday": 4,
+      "slug": "bumper-2-bumper"
+    },
+    {
+      "id": "night-4",
+      "showTitle": "Night Lounge",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Unwind with smooth vibes.",
+      "thumbnailUrl": "/thumbnails/night-lounge.png",
+      "weekday": 4,
+      "slug": "night-lounge"
+    },
+    {
+      "id": "power-down-4",
+      "showTitle": "Power Down",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Wind down sessions.",
+      "thumbnailUrl": "/thumbnails/power-down.png",
+      "weekday": 4,
+      "slug": "power-down"
+    },
+    {
+      "id": "music-4",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 4,
+      "slug": "music-4"
+    },
+    {
+      "id": "power-up-5",
+      "showTitle": "Power Up",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Your weekday starter.",
+      "thumbnailUrl": "/thumbnails/power-up.png",
+      "weekday": 5,
+      "slug": "power-up"
+    },
+    {
+      "id": "lazy-lounge-5",
+      "showTitle": "Lazy Lounge",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Midday mellow mood.",
+      "thumbnailUrl": "/thumbnails/lazy-lounge.png",
+      "weekday": 5,
+      "slug": "lazy-lounge"
+    },
+    {
+      "id": "bumper-5",
+      "showTitle": "Bumper 2 Bumper",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Evening rush tunes.",
+      "thumbnailUrl": "/thumbnails/bumper.png",
+      "weekday": 5,
+      "slug": "bumper-2-bumper"
+    },
+    {
+      "id": "night-5",
+      "showTitle": "Night Lounge",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Unwind with smooth vibes.",
+      "thumbnailUrl": "/thumbnails/night-lounge.png",
+      "weekday": 5,
+      "slug": "night-lounge"
+    },
+    {
+      "id": "power-down-5",
+      "showTitle": "Power Down",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Wind down sessions.",
+      "thumbnailUrl": "/thumbnails/power-down.png",
+      "weekday": 5,
+      "slug": "power-down"
+    },
+    {
+      "id": "music-5",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 5,
+      "slug": "music-5"
+    },
+    {
+      "id": "sat-1",
+      "showTitle": "Zen Lounge",
+      "startTime": "06:00",
+      "endTime": "11:00",
+      "description": "Weekend wind-in and relaxation.",
+      "thumbnailUrl": "/thumbnails/zen.png",
+      "weekday": 6,
+      "slug": "zen-lounge"
+    },
+    {
+      "id": "sat-2",
+      "showTitle": "The Catch Up",
+      "startTime": "12:00",
+      "endTime": "16:00",
+      "description": "Weekend replay zone.",
+      "thumbnailUrl": "/thumbnails/catch-up.png",
+      "weekday": 6,
+      "slug": "the-catch-up"
+    },
+    {
+      "id": "sat-3",
+      "showTitle": "The Drift",
+      "startTime": "16:00",
+      "endTime": "20:00",
+      "description": "Saturdays with soul and groove.",
+      "thumbnailUrl": "/thumbnails/drift.png",
+      "weekday": 6,
+      "slug": "the-drift"
+    },
+    {
+      "id": "sat-4",
+      "showTitle": "On The Rocks",
+      "startTime": "20:00",
+      "endTime": "00:00",
+      "description": "Turn-up with bold mixes.",
+      "thumbnailUrl": "/thumbnails/on-the-rocks.png",
+      "weekday": 6,
+      "slug": "on-the-rocks"
+    },
+    {
+      "id": "sat-5",
+      "showTitle": "Saturday Night Soiree",
+      "startTime": "00:00",
+      "endTime": "05:00",
+      "description": "Party through the midnight hour.",
+      "thumbnailUrl": "/thumbnails/saturday-soiree.png",
+      "weekday": 6,
+      "slug": "saturday-night-soiree"
+    },
+    {
+      "id": "sat-6",
+      "showTitle": "Music",
+      "startTime": "05:00",
+      "endTime": "06:00",
+      "description": "Continuous streaming music.",
+      "thumbnailUrl": "/thumbnails/music.png",
+      "weekday": 6,
+      "slug": "sat-6"
+    }
+  ],
+  "coolfm": [
+    {
+      "id": "cool-sun-1",
+      "showTitle": "Cool Sunday",
+      "startTime": "08:00",
+      "endTime": "12:00",
+      "description": "Cool R&B vibes.",
+      "thumbnailUrl": "/thumbnails/cool-sunday.png",
+      "weekday": 0,
+      "slug": "cool-sunday"
+    }
+  ]
+}

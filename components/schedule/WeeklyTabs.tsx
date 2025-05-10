@@ -57,9 +57,9 @@ export default function WeeklyTabs() {
         return (
           <TabsContent key={day.value} value={day.value}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 px-2 sm:px-0">
-              {shows.map((slot) => {
+            {shows.map((slot) => {
                 const now = new Date();
-                const todayDay = now.getDay().toString(); // current day of week
+                const todayDay = now.getDay().toString();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
                 const [sh, sm] = slot.startTime.split(":").map(Number);
@@ -67,26 +67,30 @@ export default function WeeklyTabs() {
                 const start = sh * 60 + sm;
                 const end = eh * 60 + em;
 
-                // Corrected isLive logic:
                 const isToday = todayDay === day.value;
                 const isDuringShow = end <= start
-                  ? currentMinutes >= start || currentMinutes < end // handle shows crossing midnight
+                  ? currentMinutes >= start || currentMinutes < end
                   : currentMinutes >= start && currentMinutes < end;
 
-                const isLive = isToday && isDuringShow; // ✅ Must match BOTH today and correct time
+                const isLive = isToday && isDuringShow;
+
+                // generate slug from title
+                const slug = slot.showTitle.toLowerCase().replace(/\s+/g, "-");
 
                 return (
-                  <ScheduleCard
-                    key={slot.id}
-                    title={slot.showTitle}
-                    description={slot.description}
-                    thumbnailUrl={slot.thumbnailUrl}
-                    startTime={slot.startTime}
-                    endTime={slot.endTime}
-                    isLive={isLive}
-                  />
+                  <div key={slot.id} id={`show-${slug}`}>
+                    <ScheduleCard
+                      title={slot.showTitle}
+                      description={slot.description}
+                      thumbnailUrl={slot.thumbnailUrl}
+                      startTime={slot.startTime}
+                      endTime={slot.endTime}
+                      isLive={isLive}
+                    />
+                  </div>
                 );
               })}
+
             </div>
           </TabsContent>
         );

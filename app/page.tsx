@@ -4,6 +4,7 @@
 import { AuroraBackground } from "@/components/ui/AuroraBackground"; 
 import { motion } from "motion/react";
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LivePlayer from "@/components/radio/LivePlayer";
@@ -14,6 +15,9 @@ import stations from "@/data/stations.json";
 
 
 export default function HomePage() {
+  const searchParams = useSearchParams()
+  const highlightSlug = searchParams?.get("highlight")
+
   const { selected, setSelected } = useStationStore();
 
   useEffect(() => {
@@ -22,6 +26,13 @@ export default function HomePage() {
     }
   }, [selected]);
 
+  useEffect(() => {
+    if (highlightSlug) {
+      const el = document.getElementById(`show-${highlightSlug}`)
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+    }
+  }, [highlightSlug])
+  
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Navbar />
@@ -45,6 +56,18 @@ export default function HomePage() {
                 <p className="text-base text-muted-foreground">
                   Your sound lives here. Tune in and vibe with Lounge.
                 </p>
+                {/* Social Links */}
+                  <div className="mt-6 flex  gap-6 text-gray-600 dark:text-gray-400">
+                    <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-foreground dark:hover:text-foreground">
+                      <i className="ri-twitter-x-line text-2xl" />
+                    </a>
+                    <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-foreground dark:hover:text-foreground">
+                      <i className="ri-instagram-line text-2xl" />
+                    </a>
+                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-foreground dark:hover:text-foreground">
+                      <i className="ri-youtube-line text-2xl" />
+                    </a>
+                  </div>
               </div>
 
               {selected && (

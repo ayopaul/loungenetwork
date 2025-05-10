@@ -21,7 +21,7 @@ export default function PlayerDock() {
   if (!selected || !show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md px-4 py-2 flex items-center justify-between">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ea001d] text-white px-4 py-2 flex items-center justify-between shadow-md">
       {/* Show Info */}
       <div className="flex items-center gap-3 overflow-hidden">
         <Image
@@ -33,7 +33,7 @@ export default function PlayerDock() {
         />
         <div className="truncate">
           <p className="text-sm font-medium truncate">{show.showTitle}</p>
-          <p className="text-xs text-muted-foreground truncate">{show.startTime} – {show.endTime}</p>
+          <p className="text-[13px] text-white/80 font-normal leading-tight tracking-normal truncate">{show.startTime} – {show.endTime}</p>
         </div>
       </div>
 
@@ -42,13 +42,13 @@ export default function PlayerDock() {
         {/* Play/Pause */}
         <button
           onClick={togglePlayback}
-          className="p-2 rounded-full bg-black text-white hover:bg-gray-800 transition"
+          className="p-2 rounded-full bg-white text-[#ea001d] hover:bg-white/90 transition"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? (
-            <SquareIcon className="w-5 h-5 fill-white" />
+            <SquareIcon className="w-5 h-5 fill-current" />
           ) : (
-            <PlayIcon className="w-5 h-5 fill-white" />
+            <PlayIcon className="w-5 h-5  fill-current" />
           )}
         </button>
 
