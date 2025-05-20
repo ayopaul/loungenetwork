@@ -1,39 +1,71 @@
-// app/blog/page.tsx
-import fs from "fs/promises"
-import path from "path"
-import Navbar from "@/components/layout/Navbar"
-import BlogPageClient from "./BlogPageClient"
+//app/blog/page.tsx
+
+
+'use client';
+
+import { useStationStore } from "@/stores/useStationStore";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 
 type Post = {
-  id: string
-  title: string
-  slug: string
-  coverImage: string
-  excerpt: string
-  category: string
-  published: boolean
-}
+  id: string;
+  title: string;
+  slug: string;
+  coverImage: string;
+  excerpt: string;
+  category: string;
+  published: boolean;
+};
 
-export default async function BlogIndexPage() {
-  const filePath = path.join(process.cwd(), "data", "posts.json")
-  const raw = await fs.readFile(filePath, "utf-8")
-  const all = JSON.parse(raw)
+export default function BlogIndexPage() {
+  const { selected } = useStationStore();
+  const [posts, setPosts] = useState<Post[]>([]);
 
-  const allPosts = Object.values(all)
-    .flatMap((stationPosts: any) => Object.values(stationPosts)) as Post[]
+  useEffect(() => {
+    if (!selected) return;
+    fetch(`/api/blog?stationId=${selected.id}`)
+      .then((res) => res.json())
+      .then(setPosts);
+  }, [selected]);
 
-  const publishedPosts = allPosts.filter((post) => post.published)
-  const categories = Array.from(new Set(publishedPosts.map(post => post.category))).sort()
+  const publishedPosts = posts.filter((post) => post.published);
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
-      <main className="min-h-screen bg-background text-foreground px-4 pt-10 pb-20">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">All Blog Posts</h1>
-          <BlogPageClient posts={publishedPosts} categories={categories} />
-        </div>
-      </main>
-    </>
-  )
+    <main className="flex-grow container mx-auto px-4 py-10">
+       
+       <header className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">All Blog Posts</h1>
+      </header>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {publishedPosts.map((post) => (
+          <Link
+            key={post.id}
+            href={`/blog/${post.slug}`}
+            className="border rounded-lg overflow-hidden hover:bg-muted transition"
+          >
+            {post.coverImage && (
+              <img
+                src={post.coverImage}
+                alt={post.title}
+                className="w-full h-40 object-cover"
+              />
+            )}
+            <div className="p-4">
+              <p className="text-sm text-muted-foreground uppercase mb-1">
+                {post.category}
+              </p>
+              <h2 className="font-semibold text-lg line-clamp-1">{post.title}</h2>
+              <p className="text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </main>
+    <Footer />
+    </div>
+  );
 }

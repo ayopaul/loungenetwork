@@ -1,10 +1,10 @@
-// app/team/page.tsx – keep API route, add times + thumbnails
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { useStationStore } from "@/stores/useStationStore";
+
 import {
   Drawer,
   DrawerContent,
@@ -23,38 +23,44 @@ interface OAP {
   role: string;
   bio: string;
   photoUrl: string;
-  showSlugs?: string[]; // linked show IDs
-  shows?: string[];     // fallback title array
+  showSlugs?: string[];
+  shows?: string[];
 }
 
 interface Show {
   id: string;
   title: string;
   thumbnailUrl?: string;
-  startTime?: string; // "16:00"
-  endTime?: string;   // "20:00"
+  startTime?: string;
+  endTime?: string;
 }
 
 /* ---------------- Component ---------------- */
 export default function TeamPage() {
+  const { selected } = useStationStore(); // ✅ declare selected station
   const [oaps, setOaps] = useState<OAP[]>([]);
   const [shows, setShows] = useState<Show[]>([]);
   const [selectedOAP, setSelectedOAP] = useState<OAP | null>(null);
 
   useEffect(() => {
+    if (!selected?.id) return;
+  
+    const stationId = selected.id; // ✅ narrowed type here
+  
     async function loadData() {
       try {
         const [oapRes, scheduleRes] = await Promise.all([
-          fetch('/api/oaps'),
-          fetch('/api/schedule?stationId=lounge877'), // ← keep existing route
+          fetch(`/api/oaps?stationId=${stationId}`),
+          fetch(`/api/schedule?stationId=${stationId}`), // ✅ now stationId is always a string
         ]);
+  
         if (!oapRes.ok || !scheduleRes.ok) throw new Error('Failed to fetch');
-
+  
         const [oapData, scheduleData] = await Promise.all([
           oapRes.json(),
           scheduleRes.json(),
         ]);
-
+  
         setOaps(oapData as OAP[]);
         setShows(
           (scheduleData as any[]).map((s) => ({
@@ -69,10 +75,10 @@ export default function TeamPage() {
         console.error(err);
       }
     }
+  
     loadData();
-  }, []);
+  }, [selected?.id]); // ✅ rerun when station changes
 
-  /* helpers */
   const getShowsForOAP = (oap: OAP): Show[] =>
     (oap.showSlugs ?? [])
       .map((slug) => shows.find((s) => s.id === slug))
@@ -81,7 +87,6 @@ export default function TeamPage() {
   const timeRange = (s?: string, e?: string) =>
     s && e ? `${s} – ${e}` : s ?? e ?? null;
 
-  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar />
@@ -89,7 +94,7 @@ export default function TeamPage() {
         <header className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Meet our presenters</h1>
           <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-            The voices and talents behind Lounge Network Lagos
+            The voices and talents behind {selected?.name ?? 'Lounge Network'}
           </p>
         </header>
 
@@ -110,7 +115,6 @@ export default function TeamPage() {
                 </article>
               </DrawerTrigger>
 
-              {/* mobile 70vh, desktop 50% */}
               <DrawerContent className="w-full h-[70vh] sm:h-1/2 overflow-y-auto rounded-t-xl p-6">
                 <DrawerHeader className="text-center relative">
                   <DrawerClose asChild>
@@ -126,7 +130,6 @@ export default function TeamPage() {
 
                   {selectedOAP && (
                     <>
-                      {/* header */}
                       <div className="flex flex-col items-center space-y-2 mt-4">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-muted">
                           <img src={selectedOAP.photoUrl} alt={selectedOAP.name} className="object-cover w-full h-full" />
@@ -135,12 +138,10 @@ export default function TeamPage() {
                         <DrawerDescription>{selectedOAP.role}</DrawerDescription>
                       </div>
 
-                      {/* bio */}
                       <p className="mt-6 text-sm text-muted-foreground px-4 whitespace-pre-line">
                         {selectedOAP.bio}
                       </p>
 
-                      {/* shows block */}
                       <div className="mt-6 px-4">
                         <h3 className="text-primary font-semibold mb-2">Shows:</h3>
                         {(() => {

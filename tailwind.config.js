@@ -16,14 +16,17 @@ module.exports = {
 			animation: {
 			  aurora: 'aurora 60s linear infinite',
 			},
+			fontFamily: {
+				sans: ['var(--font-montserrat)', 'sans-serif'],
+			  },
 		
 		colors: {
 		  colors: {
 			brandRed: '#ea001d',
-        	brandAccent: 'rgb(247,3,12)', // From srgb 0.9702 0.012 0.0473
+        	brandAccent: '#FF173E', // From srgb 0.9702 0.012 0.0473
 			primary: '#bd0922',
 			secondary: '#fe58ad',
-			accent: '#ff825d',
+			accent: '#FF173E',
 		  },
 		  background: 'hsl(var(--background))',
 		  foreground: 'hsl(var(--foreground))',

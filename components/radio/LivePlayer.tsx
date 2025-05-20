@@ -15,7 +15,7 @@ export default function LivePlayer() {
   if (!selected || !show) return null;
 
   return (
-    <Card className="bg-gradient-to-br from-[#ea001d] via-[#ff5858] to-[#ea001d] text-white shadow-lg rounded-2xl border-0">
+    <Card className="bg-[linear-gradient(129deg,#E83273,#E43240,#DC4C24,#BD271A,#991E2F)] text-white shadow-lg rounded-2xl border-0">
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between">
           <StationSelect />

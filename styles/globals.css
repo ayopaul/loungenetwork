@@ -79,7 +79,7 @@ body {
 h1 {
   font-size: 2.25rem; /* equivalent to text-4xl */
   font-weight: 700;   /* equivalent to font-bold */
-  background: linear-gradient(to right, #ea001d, rgb(247, 3, 12));
+  background: linear-gradient(129deg,#E83273,#E43240,#DC4C24,#BD271A,#991E2F);
   -webkit-background-clip: text;
   color: transparent;
 }

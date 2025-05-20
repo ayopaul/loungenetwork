@@ -1,47 +1,43 @@
 [
   {
-    "id": "1",
+    "id": "98132226-4f99-4fa1-86d5-492536f4e48b",
+    "stationId": "lounge877",
     "name": "Symon",
-    "role": "Presenter",
     "bio": "Tune in to catch Symon (with the Y) on the Power Down show Monday ",
-    "photoUrl": "/oaps/symon.jpg",
-    "showSlugs": [],
     "shows": [
       "Power Down",
       "Night Lounge"
-    ]
+    ],
+    "photoUrl": "/oaps/98132226-4f99-4fa1-86d5-492536f4e48b.jpg"
   },
   {
-    "id": "2",
+    "id": "c2f54c06-40a8-4505-885e-b6d8d41a7ca3",
+    "stationId": "lounge877",
     "name": "Eniivy",
-    "role": "Presenter",
     "bio": "Catch Eniivy on the drive time show, \"Bumper to Bumper,\" every Monday...",
-    "photoUrl": "/oaps/eniivy.jpg",
-    "showSlugs": [],
     "shows": [
       "Bumper 2 Bumper"
-    ]
+    ],
+    "photoUrl": "/oaps/c2f54c06-40a8-4505-885e-b6d8d41a7ca3.jpg"
   },
   {
-    "id": "3",
+    "id": "7d885298-d5e3-4c9f-b73b-88ed34431ccd",
+    "stationId": "lounge877",
     "name": "Nekky",
-    "role": "Presenter",
     "bio": "Nekky on the Power Up Morning Show on Lounge Lagos for your daily dose of...",
-    "photoUrl": "/oaps/nekky.jpg",
-    "showSlugs": [],
     "shows": [
       "Power Up"
-    ]
+    ],
+    "photoUrl": "/oaps/7d885298-d5e3-4c9f-b73b-88ed34431ccd.jpg"
   },
   {
-    "id": "4",
+    "id": "0a622ecc-fde9-4e31-bf8d-6d1c4ae74abe",
+    "stationId": "lounge877",
     "name": "Kelvin AB",
-    "role": "Presenter",
     "bio": "Catch Kelvin and his witty personality every weekday from 11 am - 4 pm on the...",
-    "photoUrl": "/oaps/kelvin-ab.jpg",
-    "showSlugs": [],
     "shows": [
       "Lazy Lounge"
-    ]
+    ],
+    "photoUrl": "/oaps/0a622ecc-fde9-4e31-bf8d-6d1c4ae74abe.jpg"
   }
 ]

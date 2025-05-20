@@ -1,25 +1,34 @@
 // app/api/oaps/save/route.ts
 import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import { join } from "path";
+import { promises as fs } from "fs";
+import path from "path";
 
 export async function POST(req: Request) {
   try {
-    const { oaps } = await req.json();
+    const { stationId, oaps } = await req.json();
 
-    if (!Array.isArray(oaps)) {
-      return NextResponse.json(
-        { error: "Invalid data format. Expected { oaps: [...] }." },
-        { status: 400 }
-      );
+    if (!stationId || !Array.isArray(oaps)) {
+      return NextResponse.json({ error: "Missing stationId or invalid OAPs" }, { status: 400 });
     }
 
-    const filePath = join(process.cwd(), "data", "oaps.json");
-    await writeFile(filePath, JSON.stringify(oaps, null, 2));
+    const filePath = path.join(process.cwd(), "data", "oaps.json");
+
+    // Read current data
+    const raw = await fs.readFile(filePath, "utf8");
+    const existing = JSON.parse(raw);
+
+    // Remove any OAPs that belong to the same station
+    const preserved = existing.filter((o: any) => o.stationId !== stationId);
+
+    // Add in the new ones
+    const merged = [...preserved, ...oaps];
+
+    // Write it back
+    await fs.writeFile(filePath, JSON.stringify(merged, null, 2));
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Error saving OAPs:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

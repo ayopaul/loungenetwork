@@ -21,7 +21,7 @@ export default function PlayerDock() {
   if (!selected || !show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ea001d] text-white px-4 py-2 flex items-center justify-between shadow-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[linear-gradient(129deg,#E83273,#E43240,#DC4C24,#BD271A,#991E2F)] text-white px-4 py-2 flex items-center justify-between shadow-md">
       {/* Show Info */}
       <div className="flex items-center gap-3 overflow-hidden">
         <Image

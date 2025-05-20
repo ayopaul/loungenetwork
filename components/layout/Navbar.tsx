@@ -6,6 +6,7 @@ import { MenuIcon } from "lucide-react";
 import ThemeToggle from "../admin/ThemeToggle";
 import ShowSearchDialog from "@/components/shared/ShowSearchDialog";
 import schedules from "@/data/schedules.json";
+import { StationSelect } from "@/components/station/StationSelect";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,9 @@ export default function Navbar() {
           <li>
             <ThemeToggle />
           </li>
+          <li>
+          <StationSelect />
+          </li>
         </ul>
 
         {/* Mobile nav */}
@@ -62,6 +66,9 @@ export default function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/about">About</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+              <StationSelect />
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
               <ShowSearchDialog shows={allShows} />
