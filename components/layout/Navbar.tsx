@@ -67,9 +67,9 @@ export default function Navbar() {
               <DropdownMenuItem asChild>
                 <Link href="/about">About</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-              <StationSelect />
-              </DropdownMenuItem>
+              <div className="px-2 py-1">
+                <StationSelect />
+              </div>
               <DropdownMenuItem asChild>
               <ShowSearchDialog shows={allShows} />
               </DropdownMenuItem>
