@@ -19,7 +19,7 @@ export default function PlayerBar() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#ea001d] text-white px-4 py-2 flex items-center justify-between shadow-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-md bg-white/60 border-t-[1.5px] border-[#ea001d] text-black px-4 py-2 flex items-center justify-between shadow-md">
       {/* Show Info */}
       <div className="flex items-center gap-3">
         <Image
