@@ -10,6 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useStationStore } from "@/stores/useStationStore";
 import { useBlogStore } from "../../stores/useBlogStore";
 import Markdown from "react-markdown";
@@ -18,11 +26,15 @@ import rehypeRaw from "rehype-raw";
 import YouTube from "@/components/blog/YouTube";
 import MarkdownEditor from "./MarkdownEditor";
 
-const categories = ["Music", "Events", "Celebrity Gist"];
+
 
 function PostForm() {
   const { selected } = useStationStore();
   const { isEditMode, selectedPost, closeDialog } = useBlogStore();
+
+  const [categories, setCategories] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
@@ -34,6 +46,20 @@ function PostForm() {
     content: "",
     published: false,
   });
+
+  useEffect(() => {
+    if (selected?.id) {
+      Promise.all([
+        fetch(`/api/categories/get?stationId=${selected.id}`).then((res) => res.json()),
+        fetch(`/api/blog?stationId=${selected.id}`).then((res) => res.json())
+      ]).then(([catRes, postRes]) => {
+        const all = (catRes.categories || []);
+        const used = [...new Set((postRes.posts || []).map((p: any) => p.category).filter(Boolean))];
+        const combined = [...new Set([...all.map((c: { name: string }) => c.name), ...used])].sort();
+        setCategories(combined);
+      });
+    }
+  }, [selected?.id]);
 
   useEffect(() => {
     if (isEditMode && selectedPost) {
@@ -76,6 +102,23 @@ function PostForm() {
     });
 
     if (res.ok) {
+      // Persist new category if not already present
+      // Avoid saving duplicate categories
+      if (!categories.includes(form.category)) {
+        await fetch("/api/categories/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            stationId: selected.id,
+            category: {
+              name: form.category,
+              slug: form.category.toLowerCase().replace(/\s+/g, "-"),
+              visible: false
+            }
+          })
+        });
+      }
+
       alert("Post saved!");
       closeDialog();
     } else {
@@ -112,15 +155,48 @@ function PostForm() {
         </div>
         <div>
           <Label>Category</Label>
-          <select
-            value={form.category}
-            onChange={(e) => handleChange("category", e.target.value)}
-            className="w-full border rounded p-2 bg-background text-foreground"
-          >
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start">
+                {form.category || "Select category"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Search or create category..."
+                  value={searchTerm}
+                  onValueChange={(val) => setSearchTerm(val)}
+                />
+                <CommandEmpty>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left"
+                    onClick={() => {
+                      handleChange("category", searchTerm);
+                      setOpen(false);
+                    }}
+                  >
+                    Create category “{searchTerm}”
+                  </Button>
+                </CommandEmpty>
+                <CommandGroup>
+                  {categories.map((cat) => (
+                    <CommandItem
+                      key={cat}
+                      value={cat}
+                      onSelect={(val) => handleChange("category", val)}
+                    >
+                      {cat}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <p className="text-sm text-muted-foreground mt-1">
+            Type to select a category. If you enter a new one, it will be created automatically.
+          </p>
         </div>
         <div>
           <Label>Cover Image</Label>

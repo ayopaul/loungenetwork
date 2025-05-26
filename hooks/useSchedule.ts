@@ -17,26 +17,34 @@ export function useSchedule() {
   const { selected } = useStationStore();
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!selected?.id) return;
-  
-    async function fetchSchedule() {
+    if (!selected?.id) {
+      setSchedule([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchSchedule = async () => {
       setLoading(true);
+      setError(null);
+
       try {
-        const res = await fetch(`/api/schedule?stationId=${selected!.id}`);
+        const res = await fetch(`/api/schedule?stationId=${selected.id}`);
         const data = await res.json();
-        setSchedule(data);
-      } catch (error) {
-        console.error("Failed to fetch schedule:", error);
+        setSchedule(Array.isArray(data) ? data : []);
+      } catch (err: any) {
+        console.error("Failed to fetch schedule:", err);
+        setError(err);
         setSchedule([]);
       } finally {
         setLoading(false);
       }
-    }
-  
-    fetchSchedule();
-  }, [selected]);  
+    };
 
-  return { schedule, loading };
+    fetchSchedule();
+  }, [selected]);
+
+  return { schedule, loading, error };
 }

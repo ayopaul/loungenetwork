@@ -1,0 +1,24 @@
+{
+  "lounge877": [
+    {
+      "name": "2nd test ",
+      "slug": "2nd-test-",
+      "visible": false
+    },
+    {
+      "name": "Music",
+      "slug": "music",
+      "visible": false
+    },
+    {
+      "name": "3rd test",
+      "slug": "3rd-test",
+      "visible": false
+    },
+    {
+      "name": "2nd test",
+      "slug": "2nd-test",
+      "visible": false
+    }
+  ]
+}

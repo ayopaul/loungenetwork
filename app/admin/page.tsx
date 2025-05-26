@@ -34,6 +34,16 @@ export default function AdminSettingsPage() {
     fetchStations();
   }, []);
 
+  useEffect(() => {
+    function handleBlogRefresh() {
+      setSection("blog");
+      window.location.reload();
+    }
+
+    window.addEventListener("refresh-blog-tab", handleBlogRefresh);
+    return () => window.removeEventListener("refresh-blog-tab", handleBlogRefresh);
+  }, []);
+
   if (!selectedStation) {
     return <p className="text-muted-foreground p-6">Loading stations...</p>;
   }
