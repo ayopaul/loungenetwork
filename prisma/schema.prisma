@@ -35,6 +35,7 @@ model Post {
   stationId  String
   station    Station  @relation(fields: [stationId], references: [id])
   createdAt  DateTime @default(now()) 
+  @@unique([slug, stationId], name: "slug_stationId")
 }
 
 model Category {
