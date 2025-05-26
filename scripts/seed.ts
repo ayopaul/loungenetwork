@@ -1,5 +1,4 @@
-import { PrismaClient } from '../generated/prisma';
-import type { Prisma } from '../generated/prisma';
+import { PrismaClient } from "@prisma/client";
 import stations from '../data/stations.json';
 import posts from '../data/posts.json';
 import oaps from '../data/oaps.json';
@@ -78,10 +77,19 @@ async function main() {
     if (!oap.id || typeof oap.id !== 'string') {
       oap.id = randomUUID();
     }
+
+    // Extend with slug, using type assertion to allow the extra property
+    const oapWithSlug = {
+      ...oap,
+      slug: (oap as any).slug ?? oap.name.toLowerCase().replace(/\s+/g, "-")
+    } as typeof oap & { slug: string };
+
+    console.log(`📛 Seeding OAP: ${oap.name} → slug: ${oapWithSlug.slug}`);
+
     await prisma.oAP.upsert({
-      where: { id: oap.id },
-      update: oap,
-      create: oap
+      where: { id: oapWithSlug.id },
+      update: oapWithSlug,
+      create: oapWithSlug
     });
   }
 

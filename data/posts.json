@@ -30,24 +30,6 @@
       "content": "yesyys",
       "published": false
     }
-  ],
-  "coolfm": [
-    {
-      "id": "coolfm-post-1",
-      "title": "Cool FM Playlist Update",
-      "slug": "cool-playlist-update",
-      "coverImage": "/covers/cool-update.png",
-      "excerpt": "Stay chill with the updated Cool FM playlist.",
-      "content": "### What’s New?\nWe’ve refreshed our lineup for the weekend...",
-      "category": "Playlist",
-      "published": false
-    }
-  ],
-  "lounge877_categories": [
-    "test category",
-    "2nd test ",
-    "Music",
-    "3rd test",
-    "2nd test"
   ]
+  
 }

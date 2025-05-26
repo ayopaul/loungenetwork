@@ -420,17 +420,5 @@
       "weekday": 6,
       "slug": "sat-6"
     }
-  ],
-  "coolfm": [
-    {
-      "id": "cool-sun-1",
-      "showTitle": "Cool Sunday",
-      "startTime": "08:00",
-      "endTime": "12:00",
-      "description": "Cool R&B vibes.",
-      "thumbnailUrl": "/thumbnails/cool-sunday.png",
-      "weekday": 0,
-      "slug": "cool-sunday"
-    }
   ]
 }

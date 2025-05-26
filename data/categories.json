@@ -3,22 +3,26 @@
     {
       "name": "2nd test ",
       "slug": "2nd-test-",
-      "visible": false
+      "visible": false,
+      "id": "ef25e01f-987d-42e6-abe6-01f5cfba63bf"
     },
     {
       "name": "Music",
       "slug": "music",
-      "visible": false
+      "visible": false,
+      "id": "1b749271-9d50-483b-8ed5-a910199f72c9"
     },
     {
       "name": "3rd test",
       "slug": "3rd-test",
-      "visible": false
+      "visible": false,
+      "id": "c42988f2-903d-4355-998d-165661f497cb"
     },
     {
       "name": "2nd test",
       "slug": "2nd-test",
-      "visible": false
+      "visible": false,
+      "id": "0af7713e-c310-4838-974d-3c6980066798"
     }
   ]
 }
