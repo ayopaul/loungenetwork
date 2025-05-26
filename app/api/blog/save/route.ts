@@ -12,7 +12,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing stationId or slug" }, { status: 400 });
     }
 
-    // Ensure category exists in Category table
+    let categoryId: string | null = null;
+
     if (post.category) {
       const slug = post.category.toLowerCase().replace(/\s+/g, "-");
       const existingCategory = await prisma.category.findFirst({
@@ -21,8 +22,10 @@ export async function POST(req: NextRequest) {
           stationId
         }
       });
-      if (!existingCategory) {
-        await prisma.category.create({
+      if (existingCategory) {
+        categoryId = existingCategory.id;
+      } else {
+        const created = await prisma.category.create({
           data: {
             id: `${slug}-${Date.now()}`,
             name: post.category,
@@ -31,6 +34,7 @@ export async function POST(req: NextRequest) {
             stationId
           }
         });
+        categoryId = created.id;
       }
     }
 
@@ -38,35 +42,38 @@ export async function POST(req: NextRequest) {
     console.log("🪵 Post data:", post);
 
     try {
+      const updateData = {
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt || "",
+        content: post.content || "",
+        coverImage: post.coverImage || "",
+        published: post.published || false,
+        stationId: stationId,
+        ...(categoryId ? { categoryId } : {}),
+      };
+
+      const createData: any = {
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt || "",
+        content: post.content || "",
+        coverImage: post.coverImage || "",
+        published: post.published || false,
+        stationId: stationId,
+      };
+
+      if (categoryId) {
+        createData.categoryId = categoryId;
+      }
+
       await prisma.post.upsert({
         where: {
-          slug: post.slug,
-        },
-        update: {
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt || "",
-          content: post.content || "",
-          coverImage: post.coverImage || "",
-          published: post.published || false,
-          category: post.category.toLowerCase().replace(/\s+/g, "-"),
-          station: {
-            connect: { id: stationId },
-          },
-        },
-        create: {
           id: post.id,
-          title: post.title,
-          slug: post.slug,
-          excerpt: post.excerpt || "",
-          content: post.content || "",
-          coverImage: post.coverImage || "",
-          published: post.published || false,
-          category: post.category.toLowerCase().replace(/\s+/g, "-"),
-          station: {
-            connect: { id: stationId },
-          },
         },
+        update: updateData,
+        create: createData,
       });
     } catch (err) {
       console.error("🔥 Prisma post.upsert error:", err);
