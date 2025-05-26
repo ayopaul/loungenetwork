@@ -39,7 +39,9 @@ export async function POST(req: NextRequest) {
 
     try {
       await prisma.post.upsert({
-        where: { id: post.id },
+        where: {
+          slug: post.slug,
+        },
         update: {
           title: post.title,
           slug: post.slug,
@@ -47,10 +49,10 @@ export async function POST(req: NextRequest) {
           content: post.content || "",
           coverImage: post.coverImage || "",
           published: post.published || false,
-          category: post.category,
+          category: post.category.toLowerCase().replace(/\s+/g, "-"),
           station: {
-            connect: { id: stationId }
-          }
+            connect: { id: stationId },
+          },
         },
         create: {
           id: post.id,
@@ -60,11 +62,11 @@ export async function POST(req: NextRequest) {
           content: post.content || "",
           coverImage: post.coverImage || "",
           published: post.published || false,
-          category: post.category,
+          category: post.category.toLowerCase().replace(/\s+/g, "-"),
           station: {
-            connect: { id: stationId }
-          }
-        }
+            connect: { id: stationId },
+          },
+        },
       });
     } catch (err) {
       console.error("🔥 Prisma post.upsert error:", err);
