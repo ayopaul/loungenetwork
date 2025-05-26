@@ -25,12 +25,15 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import YouTube from "@/components/blog/YouTube";
 import MarkdownEditor from "./MarkdownEditor";
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useStations } from "@/hooks/useStations"; // make sure this hook fetches all stations
+import { toast } from "@/hooks/use-toast";
 
 
 function PostForm() {
-  const { selected } = useStationStore();
+  const { selected, setSelected } = useStationStore();
   const { isEditMode, selectedPost, closeDialog } = useBlogStore();
+  const { stations } = useStations();
 
   const [categories, setCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,10 +122,17 @@ function PostForm() {
         });
       }
 
-      alert("Post saved!");
+      toast({
+        title: "Post saved",
+        description: "Your blog post was successfully saved.",
+      });
       closeDialog();
     } else {
-      alert("Failed to save post.");
+      toast({
+        title: "Post save failed",
+        description: "Something went wrong while saving your blog post.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -144,12 +154,33 @@ function PostForm() {
 
   return (
     <div className="space-y-4 bg-background text-foreground p-1">
+      <div>
+        <Label>Station</Label>
+        <Select
+          value={selected?.id}
+          onValueChange={(val) => {
+            const match = stations.find((s) => s.id === val);
+            if (match) setSelected(match);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select station" />
+          </SelectTrigger>
+          <SelectContent>
+            {stations.map((station) => (
+              <SelectItem key={station.id} value={station.id}>
+                {station.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Title</Label>
           <Input value={form.title} onChange={(e) => handleChange("title", e.target.value)} />
         </div>
-        <div>
+        <div> 
           <Label>Slug</Label>
           <Input value={form.slug} onChange={(e) => handleChange("slug", e.target.value)} />
         </div>

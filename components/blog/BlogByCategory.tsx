@@ -25,7 +25,11 @@ export default function BlogByCategory({ limit = 4 }: { limit?: number }) {
 
     fetch(`/api/blog?stationId=${selected.id}`)
       .then((res) => res.json())
-      .then((posts: Post[]) => {
+      .then((data) => {
+        const posts = Array.isArray(data) ? data : [];
+        if (!Array.isArray(data)) {
+          console.error("Fetched blog data is not an array:", data);
+        }
         const filtered = posts.filter((p) => p.published);
         const groupedByCategory = filtered.reduce((acc: Record<string, Post[]>, post) => {
           if (!acc[post.category]) acc[post.category] = [];
@@ -33,6 +37,10 @@ export default function BlogByCategory({ limit = 4 }: { limit?: number }) {
           return acc;
         }, {});
         setGrouped(groupedByCategory);
+      })
+      .catch((err) => {
+        console.error("Failed to load blog posts:", err);
+        setGrouped({});
       });
   }, [selected]);
 

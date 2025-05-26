@@ -1,5 +1,8 @@
 import { create } from "zustand";
 
+const savedStation = typeof window !== "undefined" ? localStorage.getItem("selected-station") : null;
+const initialSelected = savedStation ? JSON.parse(savedStation) : null;
+
 type Station = {
   id: string;
   name: string;
@@ -17,14 +20,16 @@ type StationAdminState = {
 export const useStationAdminStore = create<StationAdminState>((set) => ({
   isOpen: false,
   isEditMode: false,
-  selectedStation: null,
+  selectedStation: initialSelected,
 
-  openDialog: (station) =>
+  openDialog: (station) => {
+    if (station) localStorage.setItem("selected-station", JSON.stringify(station));
     set({
       isOpen: true,
       isEditMode: !!station,
       selectedStation: station || null,
-    }),
+    });
+  },
 
   closeDialog: () =>
     set({
@@ -33,3 +38,20 @@ export const useStationAdminStore = create<StationAdminState>((set) => ({
       selectedStation: null,
     }),
 }));
+
+
+import { useEffect } from "react";
+
+export function useHydrateStation() {
+  const openDialog = useStationAdminStore((s) => s.openDialog);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("selected-station");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.id && parsed?.name) openDialog(parsed);
+      } catch {}
+    }
+  }, []);
+}

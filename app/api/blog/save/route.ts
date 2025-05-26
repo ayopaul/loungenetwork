@@ -1,10 +1,7 @@
 //app/api/blog/save/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-
-const filePath = path.join(process.cwd(), "data", "posts.json");
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,39 +12,71 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing stationId or slug" }, { status: 400 });
     }
 
-    const raw = await fs.readFile(filePath, "utf-8");
-    const allPosts = JSON.parse(raw);
+    // Ensure category exists in Category table
+    if (post.category) {
+      const slug = post.category.toLowerCase().replace(/\s+/g, "-");
+      const existingCategory = await prisma.category.findFirst({
+        where: {
+          slug,
+          stationId
+        }
+      });
+      if (!existingCategory) {
+        await prisma.category.create({
+          data: {
+            id: `${slug}-${Date.now()}`,
+            name: post.category,
+            slug,
+            visible: true,
+            stationId
+          }
+        });
+      }
+    }
 
-    const stationPosts: any[] = allPosts[stationId] || [];
+    console.log("📌 Station ID:", stationId);
+    console.log("🪵 Post data:", post);
 
-    // Replace post if id or slug matches, else add new
-    const updatedPosts = stationPosts.map((p) => {
-      if (p.id && post.id && p.id === post.id) return post;
-      if (!post.id && p.slug === post.slug) return post;
-      return p;
+    try {
+      await prisma.post.upsert({
+        where: { id: post.id },
+        update: {
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt || "",
+          content: post.content || "",
+          coverImage: post.coverImage || "",
+          published: post.published || false,
+          category: post.category,
+          station: {
+            connect: { id: stationId }
+          }
+        },
+        create: {
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt || "",
+          content: post.content || "",
+          coverImage: post.coverImage || "",
+          published: post.published || false,
+          category: post.category,
+          station: {
+            connect: { id: stationId }
+          }
+        }
+      });
+    } catch (err) {
+      console.error("🔥 Prisma post.upsert error:", err);
+      throw err;
+    }
+
+    const categories = await prisma.category.findMany({
+      where: { stationId },
+      orderBy: { name: "asc" }
     });
 
-    const exists = updatedPosts.some((p) =>
-      (p.id && post.id && p.id === post.id) || (!post.id && p.slug === post.slug)
-    );
-
-    if (!exists) updatedPosts.push(post);
-
-    allPosts[stationId] = updatedPosts;
-
-    // Ensure station category list exists
-    const categoryKey = `${stationId}_categories`;
-    const existingCategories: string[] = allPosts[categoryKey] || [];
-
-    // Only add if the category is new and not already in the list
-    if (post.category && !existingCategories.includes(post.category)) {
-      existingCategories.push(post.category);
-    }
-    allPosts[categoryKey] = existingCategories;
-
-    await fs.writeFile(filePath, JSON.stringify(allPosts, null, 2), "utf-8");
-
-    return NextResponse.json({ success: true, categories: existingCategories });
+    return NextResponse.json({ success: true, categories });
   } catch (err) {
     console.error("Blog save error:", err);
     return NextResponse.json({ error: "Failed to save post" }, { status: 500 });

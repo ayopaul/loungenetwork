@@ -1,9 +1,6 @@
 // app/api/blog/delete/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-
-const filePath = path.join(process.cwd(), "data", "posts.json");
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const { stationId, slug } = await req.json();
@@ -11,15 +8,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing parameters" }, { status: 400 });
   }
 
-  const raw = await fs.readFile(filePath, "utf-8");
-  const allPosts = JSON.parse(raw);
+  try {
+    await prisma.post.deleteMany({
+      where: {
+        stationId,
+        slug
+      }
+    });
 
-  if (!allPosts[stationId]) {
-    return NextResponse.json({ error: "Station not found" }, { status: 404 });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Blog delete error:", err);
+    return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
-
-  allPosts[stationId] = allPosts[stationId].filter((p: any) => p.slug !== slug);
-
-  await fs.writeFile(filePath, JSON.stringify(allPosts, null, 2), "utf-8");
-  return NextResponse.json({ success: true });
 }

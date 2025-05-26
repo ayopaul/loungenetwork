@@ -18,7 +18,13 @@ export function useCurrentShow(): Show | null {
   useEffect(() => {
     const fetchSchedule = async () => {
       const res = await fetch("/api/schedule");
-      const data: Show[] = await res.json();
+      const text = await res.text();
+      let data: Show[] = [];
+      try {
+        data = text ? JSON.parse(text) : [];
+      } catch (e) {
+        data = [];
+      }
 
       const now = new Date();
       const currentWeekday = now.getDay(); // Sunday = 0

@@ -25,12 +25,28 @@ export default function AdminSettingsPage() {
   const [section, setSection] = useState<"stations" | "shows" | "blog" | "team">("stations");
 
   useEffect(() => {
+    const saved = localStorage.getItem("selected-station");
+    let parsed: Station | null = null;
+
+    if (saved) {
+      try {
+        parsed = JSON.parse(saved);
+      } catch {}
+    }
+
     async function fetchStations() {
       const res = await fetch("/api/stations");
-      const data: Station[] = await res.json(); //  Cast it
+      const data: Station[] = await res.json();
       setStations(data);
-      setSelectedStation(data[0]);
+
+      if (parsed && data.some(s => s.id === parsed.id)) {
+        setSelectedStation(parsed);
+      } else {
+        setSelectedStation(data[0]);
+        localStorage.setItem("selected-station", JSON.stringify(data[0]));
+      }
     }
+
     fetchStations();
   }, []);
 
@@ -78,7 +94,10 @@ export default function AdminSettingsPage() {
                     {stations.map((station) => (
                       <DropdownMenuItem
                         key={station.id}
-                        onClick={() => setSelectedStation(station)}
+                        onClick={() => {
+                          setSelectedStation(station);
+                          localStorage.setItem("selected-station", JSON.stringify(station));
+                        }}
                         className="cursor-pointer capitalize"
                       >
                         {station.name}

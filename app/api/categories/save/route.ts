@@ -1,10 +1,7 @@
 // app/api/categories/save/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-
-const filePath = path.join(process.cwd(), "data", "categories.json");
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const { stationId, category } = await req.json();
@@ -13,19 +10,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing stationId or category name" }, { status: 400 });
   }
 
-  const raw = await fs.readFile(filePath, "utf-8");
-  const allCategories = JSON.parse(raw);
+  // Check for duplicate (case-insensitive) name
+  const existing = await prisma.category.findMany({
+    where: {
+      stationId,
+      name: {
+        equals: category.name,
+        mode: "insensitive"
+      }
+    }
+  });
 
-  const stationCategories = allCategories[stationId] || [];
-
-  // Prevent duplicate (case-insensitive) names
-  const exists = stationCategories.some((c: any) => c.name.toLowerCase() === category.name.toLowerCase());
-  if (!exists) {
-    stationCategories.push({ ...category, visible: category.visible ?? false });
-    allCategories[stationId] = stationCategories;
-    await fs.writeFile(filePath, JSON.stringify(allCategories, null, 2), "utf-8");
+  if (existing.length === 0) {
+    await prisma.category.create({
+      data: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        visible: category.visible ?? false,
+        stationId
+      }
+    });
   }
 
-  return NextResponse.json({ success: true, categories: allCategories[stationId] });
-}
+  const categories = await prisma.category.findMany({
+    where: { stationId },
+    orderBy: { name: "asc" }
+  });
 
+  return NextResponse.json({ success: true, categories });
+}

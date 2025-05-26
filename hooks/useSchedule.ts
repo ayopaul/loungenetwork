@@ -32,7 +32,9 @@ export function useSchedule() {
 
       try {
         const res = await fetch(`/api/schedule?stationId=${selected.id}`);
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : [];
+
         setSchedule(Array.isArray(data) ? data : []);
       } catch (err: any) {
         console.error("Failed to fetch schedule:", err);

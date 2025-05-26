@@ -1,9 +1,5 @@
-// app/api/schedule/save/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-
-const filePath = path.join(process.cwd(), "data", "schedules.json");
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,15 +9,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
 
-    // Read existing file
-    const raw = await fs.readFile(filePath, "utf-8");
-    const allSchedules = JSON.parse(raw);
+    // Remove old schedules
+    await prisma.schedule.deleteMany({
+      where: { stationId }
+    });
 
-    // Update schedule for given station
-    allSchedules[stationId] = schedule;
-
-    // Write updated JSON
-    await fs.writeFile(filePath, JSON.stringify(allSchedules, null, 2), "utf-8");
+    // Insert new schedule
+    for (const entry of schedule) {
+      await prisma.schedule.create({
+        data: {
+          ...entry,
+          stationId
+        }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

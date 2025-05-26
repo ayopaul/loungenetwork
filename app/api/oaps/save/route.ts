@@ -1,7 +1,6 @@
 // app/api/oaps/save/route.ts
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -11,20 +10,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing stationId or invalid OAPs" }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), "data", "oaps.json");
+    // Remove existing OAPs for this station
+    await prisma.oAP.deleteMany({
+      where: { stationId }
+    });
 
-    // Read current data
-    const raw = await fs.readFile(filePath, "utf8");
-    const existing = JSON.parse(raw);
-
-    // Remove any OAPs that belong to the same station
-    const preserved = existing.filter((o: any) => o.stationId !== stationId);
-
-    // Add in the new ones
-    const merged = [...preserved, ...oaps];
-
-    // Write it back
-    await fs.writeFile(filePath, JSON.stringify(merged, null, 2));
+    // Insert new ones
+    for (const oap of oaps) {
+      await prisma.oAP.create({
+        data: oap
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

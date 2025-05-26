@@ -1,21 +1,20 @@
 // app/api/oaps/route.ts
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const stationId = searchParams.get("stationId");   // ?stationId=…
+    const stationId = searchParams.get("stationId");
 
-    const filePath = path.join(process.cwd(), "data", "oaps.json");
-    const raw = await fs.readFile(filePath, "utf8");
-    const all = JSON.parse(raw);
+    const data = await prisma.oAP.findMany({
+      where: stationId ? { stationId } : undefined,
+      orderBy: { name: "asc" }
+    });
 
-    const data = stationId ? all.filter((o: any) => o.stationId === stationId) : all;
     return NextResponse.json(data);
   } catch (err) {
-    console.error("Error reading oaps.json:", err);
+    console.error("Error reading OAPs from database:", err);
     return new NextResponse("Failed to load OAPs", { status: 500 });
   }
 }

@@ -1,10 +1,5 @@
-//app/api/categories/get/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-
-const filePath = path.join(process.cwd(), "data", "categories.json");
+import prisma from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   const stationId = req.nextUrl.searchParams.get("stationId");
@@ -13,9 +8,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ categories: [] });
   }
 
-  const raw = await fs.readFile(filePath, "utf-8");
-  const allCategories = JSON.parse(raw);
-  const categories = allCategories[stationId] || [];
+  const categories = await prisma.category.findMany({
+    where: { stationId },
+    orderBy: { name: "asc" }
+  });
 
   return NextResponse.json({ categories });
 }

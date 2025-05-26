@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Station {
+  id        String   @id
+  name      String
+  streamUrl String
+  posts     Post[]
+  oaps      OAP[]
+  schedules Schedule[]
+  categories Category[]
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  excerpt    String?
+  content    String?
+  category   String
+  coverImage String?
+  published  Boolean  @default(false)
+  stationId  String
+  station    Station  @relation(fields: [stationId], references: [id])
+  createdAt  DateTime @default(now()) 
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String
+  visible   Boolean
+  stationId String
+  station   Station  @relation(fields: [stationId], references: [id])
+  @@unique([slug, stationId], name: "slug_stationId")
+}
+
+model OAP {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String
+  bio        String
+  photoUrl   String
+  shows      String[]
+  stationId  String
+  station    Station  @relation(fields: [stationId], references: [id])
+  @@unique([slug, stationId]) 
+}
+
+model Schedule {
+  id           String   @id @default(cuid())
+  showTitle    String
+  slug         String
+  startTime    String
+  endTime      String
+  description  String
+  thumbnailUrl String
+  weekday      Int
+  stationId    String
+  station      Station  @relation(fields: [stationId], references: [id])
+}
