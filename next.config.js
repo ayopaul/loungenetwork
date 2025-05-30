@@ -3,7 +3,13 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   images: {
-    domains: ['loungenetwork.ng'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'loungenetwork.ng',
+        pathname: '/**',
+      },
+    ],
   },
   devIndicators: {
     buildActivity: false,
