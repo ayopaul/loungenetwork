@@ -9,6 +9,16 @@ import { Card } from "@/components/ui/card";
 import { Station } from "@/types/types";
 import { TrashIcon, PlusIcon } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 type OAP = {
   id: string;
@@ -23,6 +33,9 @@ export default function OAPManager({ station }: { station: Station }) {
   const [oaps, setOaps] = useState<OAP[]>([]);
   const [shows, setShows] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingImages, setUploadingImages] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [oapToDelete, setOapToDelete] = useState<{ oap: OAP; index: number } | null>(null);
 
   const fetchOAPsAndShows = async () => {
     setLoading(true);
@@ -62,8 +75,9 @@ export default function OAPManager({ station }: { station: Station }) {
   };
 
   const handleAdd = () => {
+    const newId = uuidv4();
     const newOAP: OAP = {
-      id: `new-${uuidv4()}`, // Add "new-" prefix for new records
+      id: `new-${newId}`,
       stationId: station.id,
       name: "",
       bio: "",
@@ -73,22 +87,32 @@ export default function OAPManager({ station }: { station: Station }) {
     setOaps(prev => [newOAP, ...prev]);
   };
 
-  const handleDelete = (index: number) => {
-    setOaps(prev => prev.filter((_, i) => i !== index));
+  const handleDelete = async (index: number) => {
+    const oap = oaps[index];
+    
+    // If it's a new OAP (not saved to database yet), just remove from state
+    if (oap.id.startsWith("new-")) {
+      setOaps(prev => prev.filter((_, i) => i !== index));
+      toast.success("OAP removed");
+      return;
+    }
+    
+    // For existing OAPs, show confirmation dialog
+    setOapToDelete({ oap, index });
+    setDeleteDialogOpen(true);
   };
 
-  const handleSave = async () => {
-    const oapsWithStation = oaps.map(o => ({ ...o, stationId: station.id }));
+  const confirmDelete = async () => {
+    if (!oapToDelete) return;
+    
+    const { oap, index } = oapToDelete;
+    
     try {
-      const res = await fetch("/api/oaps/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stationId: station.id, oaps: oapsWithStation }),
+      const res = await fetch(`/api/oaps/${oap.id}`, {
+        method: "DELETE",
       });
       
-      // Check if response is ok first
       if (!res.ok) {
-        // Try to get error message from response
         let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
         try {
           const errorData = await res.json();
@@ -99,14 +123,106 @@ export default function OAPManager({ station }: { station: Station }) {
         throw new Error(errorMessage);
       }
       
-      // If successful, try to parse the response
+      // Remove from local state after successful deletion
+      setOaps(prev => prev.filter((_, i) => i !== index));
+      toast.success("OAP deleted successfully");
+      
+    } catch (err: any) {
+      console.error("Delete failed:", err);
+      const errorMessage = err.message || err.toString() || "Unknown error occurred";
+      toast.error("Error deleting OAP: " + errorMessage);
+    } finally {
+      setDeleteDialogOpen(false);
+      setOapToDelete(null);
+    }
+  };
+
+  const handleImageUpload = async (index: number, file: File) => {
+    const oap = oaps[index];
+    const oapId = oap.id;
+    
+    // Add to uploading set
+    setUploadingImages(prev => new Set(prev).add(oapId));
+    
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      // Generate a clean filename - use timestamp to ensure uniqueness
+      const cleanId = oapId.startsWith("new-") ? oapId.replace("new-", "") : oapId;
+      const timestamp = Date.now();
+      const fileExtension = file.name.split('.').pop() || 'jpg';
+      const filename = `${cleanId}-${timestamp}.${fileExtension}`;
+      formData.append("filename", filename);
+      
+      console.log("Uploading with filename:", filename);
+      
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Upload failed: ${errorText}`);
+      }
+      
+      const { url } = await res.json();
+      console.log("Upload successful, URL:", url);
+      
+      // Update the photoUrl immediately
+      handleUpdate(index, "photoUrl", url);
+      
+      // Show success toast
+      toast.success("Image uploaded successfully!");
+      
+      // Optionally auto-save after successful upload
+      // You can uncomment this if you want automatic saving after image upload
+      // setTimeout(() => handleSave(), 500);
+      
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Upload failed: " + (error instanceof Error ? error.message : String(error)));
+    } finally {
+      // Remove from uploading set
+      setUploadingImages(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(oapId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleSave = async (singleOap?: OAP) => {
+    const oapsToSave = singleOap ? [singleOap] : oaps.map(o => ({ ...o, stationId: station.id }));
+    try {
+      const res = await fetch("/api/oaps/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stationId: station.id, oaps: oapsToSave }),
+      });
+      
+      if (!res.ok) {
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use the HTTP status
+        }
+        throw new Error(errorMessage);
+      }
+      
       const result = await res.json();
-      alert("Changes saved!");
+      toast.success(singleOap ? "OAP saved successfully!" : "All changes saved successfully!");
+      
+      // Refresh data to get updated IDs for new records
+      await fetchOAPsAndShows();
       
     } catch (err: any) {
       console.error("Save failed:", err);
       const errorMessage = err.message || err.toString() || "Unknown error occurred";
-      alert("Error saving changes: " + errorMessage);
+      toast.error("Error saving changes: " + errorMessage);
     }
   };
 
@@ -114,12 +230,9 @@ export default function OAPManager({ station }: { station: Station }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-start items-center">
         <Button onClick={handleAdd} variant="outline">
           <PlusIcon className="w-4 h-4 mr-1" /> Add&nbsp;OAP
-        </Button>
-        <Button onClick={handleSave} variant="secondary">
-          Save&nbsp;Changes
         </Button>
       </div>
 
@@ -137,79 +250,39 @@ export default function OAPManager({ station }: { station: Station }) {
               <TrashIcon className="w-4 h-4" />
             </button>
 
-     
-              <label className="relative cursor-pointer w-16 h-16 rounded-full overflow-hidden border">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    
-                    try {
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      
-                      // Generate a clean filename without "new-" prefix
-                      const cleanId = oap.id.startsWith("new-") ? oap.id.replace("new-", "") : oap.id;
-                      const filename = `${cleanId}.jpg`;
-                      formData.append("filename", filename);
-                      
-                      console.log("Uploading with filename:", filename);
-                      
-                      const res = await fetch("/api/upload", {
-                        method: "POST",
-                        body: formData,
-                      });
-                      
-                      if (res.ok) {
-                        const { url } = await res.json();
-                        console.log("Uploaded URL:", url);
-                        
-                        // Verify the URL is accessible before updating state
-                        const img = new Image();
-                        img.onload = () => {
-                          console.log("Image verified as accessible:", url);
-                          handleUpdate(index, "photoUrl", url);
-                        };
-                        img.onerror = () => {
-                          console.error("Uploaded image is not accessible:", url);
-                          alert("Image uploaded but not accessible. Please try again.");
-                        };
-                        img.src = url;
-                        
-                      } else {
-                        const errorText = await res.text();
-                        console.error("Upload failed:", errorText);
-                        alert("Upload failed: " + errorText);
-                      }
-                    } catch (error) {
-                      console.error("Upload error:", error);
-                      alert("Upload failed: " + error);
-                    }
+            <label className="relative cursor-pointer w-16 h-16 rounded-full overflow-hidden border">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleImageUpload(index, file);
+                  }
+                }}
+              />
+              {uploadingImages.has(oap.id) ? (
+                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-xs text-blue-600">
+                  Uploading...
+                </div>
+              ) : oap.photoUrl ? (
+                <img
+                  src={oap.photoUrl}
+                  alt={oap.name || "OAP photo"}
+                  className="w-16 h-16 rounded-full object-cover"
+                  onError={(e) => {
+                    console.error("Image failed to load:", oap.photoUrl);
+                    handleUpdate(index, "photoUrl", "");
                   }}
                 />
-                {oap.photoUrl ? (
-                  <img
-                    src={oap.photoUrl}
-                    alt={oap.name || "OAP photo"}
-                    className="w-16 h-16 rounded-full object-cover"
-                    onError={(e) => {
-                      console.error("Image failed to load:", oap.photoUrl);
-                      // Show the upload placeholder again if image fails
-                      handleUpdate(index, "photoUrl", "");
-                    }}
-                    onLoad={() => {
-                      console.log("Image loaded successfully:", oap.photoUrl);
-                    }}
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xs text-muted-foreground">
-                    Upload image
-                  </div>
-                )}
-              </label>
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xs text-muted-foreground">
+                  Upload image
+                </div>
+              )}
+            </label>
+            
             <Input
               placeholder="Name"
               value={oap.name}
@@ -243,9 +316,48 @@ export default function OAPManager({ station }: { station: Station }) {
               onChange={(val) => handleUpdate(index, "shows", val)}
               placeholder="Select shows"
             />
+            
+            <Button 
+              onClick={() => handleSave(oap)} 
+              variant="default" 
+              size="sm"
+              className="w-full mt-2"
+            >
+              Save OAP
+            </Button>
           </Card>
         ))}
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete OAP</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{oapToDelete?.oap.name || 'this OAP'}"? 
+              This action cannot be undone and will permanently remove the OAP and associated photo.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setOapToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+            >
+              Delete OAP
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
