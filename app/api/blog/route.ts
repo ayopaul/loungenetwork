@@ -1,4 +1,4 @@
-//app/api/blog/route.ts
+// app/api/blog/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(posts);
   } catch (err) {
     console.error("Blog fetch error:", err);
-    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
+    // ✅ Always return an array so frontend logic doesn’t crash
+    return NextResponse.json([], { status: 500 });
   }
 }

@@ -33,7 +33,7 @@ model Post {
   published  Boolean  @default(false)
   stationId  String
   station    Station  @relation(fields: [stationId], references: [id])
-  categoryId String
+  categoryId String   @default("default-category")
   category   Category @relation("CategoryToPosts", fields: [categoryId], references: [id])
   createdAt  DateTime @default(now())
 

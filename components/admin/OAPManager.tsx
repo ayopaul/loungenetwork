@@ -63,7 +63,7 @@ export default function OAPManager({ station }: { station: Station }) {
 
   const handleAdd = () => {
     const newOAP: OAP = {
-      id: uuidv4(),
+      id: `new-${uuidv4()}`, // Add "new-" prefix for new records
       stationId: station.id,
       name: "",
       bio: "",
@@ -85,11 +85,28 @@ export default function OAPManager({ station }: { station: Station }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stationId: station.id, oaps: oapsWithStation }),
       });
-      if (!res.ok) throw await res.json();
+      
+      // Check if response is ok first
+      if (!res.ok) {
+        // Try to get error message from response
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        try {
+          const errorData = await res.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use the HTTP status
+        }
+        throw new Error(errorMessage);
+      }
+      
+      // If successful, try to parse the response
+      const result = await res.json();
       alert("Changes saved!");
+      
     } catch (err: any) {
       console.error("Save failed:", err);
-      alert("Error saving changes: " + (err.error || "Unknown error"));
+      const errorMessage = err.message || err.toString() || "Unknown error occurred";
+      alert("Error saving changes: " + errorMessage);
     }
   };
 
@@ -119,41 +136,80 @@ export default function OAPManager({ station }: { station: Station }) {
             >
               <TrashIcon className="w-4 h-4" />
             </button>
-            <label className="relative cursor-pointer w-16 h-16 rounded-full overflow-hidden border">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const formData = new FormData();
-                  formData.append("file", file);
-                  formData.append("filename", `${oap.id}.jpg`);
-                  const res = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData,
-                  });
-                  if (res.ok) {
-                    const { url } = await res.json();
-                    handleUpdate(index, "photoUrl", url);
-                  } else {
-                    alert("Upload failed.");
-                  }
-                }}
-              />
-              {oap.photoUrl ? (
-                <img
-                  src={oap.photoUrl.startsWith("http") ? oap.photoUrl : `${oap.photoUrl}`}
-                  alt={oap.name}
-                  className="w-16 h-16 rounded-full object-cover"
+
+     
+              <label className="relative cursor-pointer w-16 h-16 rounded-full overflow-hidden border">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    
+                    try {
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      
+                      // Generate a clean filename without "new-" prefix
+                      const cleanId = oap.id.startsWith("new-") ? oap.id.replace("new-", "") : oap.id;
+                      const filename = `${cleanId}.jpg`;
+                      formData.append("filename", filename);
+                      
+                      console.log("Uploading with filename:", filename);
+                      
+                      const res = await fetch("/api/upload", {
+                        method: "POST",
+                        body: formData,
+                      });
+                      
+                      if (res.ok) {
+                        const { url } = await res.json();
+                        console.log("Uploaded URL:", url);
+                        
+                        // Verify the URL is accessible before updating state
+                        const img = new Image();
+                        img.onload = () => {
+                          console.log("Image verified as accessible:", url);
+                          handleUpdate(index, "photoUrl", url);
+                        };
+                        img.onerror = () => {
+                          console.error("Uploaded image is not accessible:", url);
+                          alert("Image uploaded but not accessible. Please try again.");
+                        };
+                        img.src = url;
+                        
+                      } else {
+                        const errorText = await res.text();
+                        console.error("Upload failed:", errorText);
+                        alert("Upload failed: " + errorText);
+                      }
+                    } catch (error) {
+                      console.error("Upload error:", error);
+                      alert("Upload failed: " + error);
+                    }
+                  }}
                 />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xs text-muted-foreground">
-                  Upload image
-                </div>
-              )}
-            </label>
+                {oap.photoUrl ? (
+                  <img
+                    src={oap.photoUrl}
+                    alt={oap.name || "OAP photo"}
+                    className="w-16 h-16 rounded-full object-cover"
+                    onError={(e) => {
+                      console.error("Image failed to load:", oap.photoUrl);
+                      // Show the upload placeholder again if image fails
+                      handleUpdate(index, "photoUrl", "");
+                    }}
+                    onLoad={() => {
+                      console.log("Image loaded successfully:", oap.photoUrl);
+                    }}
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xs text-muted-foreground">
+                    Upload image
+                  </div>
+                )}
+              </label>
             <Input
               placeholder="Name"
               value={oap.name}

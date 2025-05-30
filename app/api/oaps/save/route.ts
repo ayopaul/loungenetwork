@@ -2,29 +2,61 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// Utility to generate a slug
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-");
+}
+
 export async function POST(req: Request) {
   try {
-    const { stationId, oaps } = await req.json();
+    const { oaps, stationId } = await req.json();
 
-    if (!stationId || !Array.isArray(oaps)) {
-      return NextResponse.json({ error: "Missing stationId or invalid OAPs" }, { status: 400 });
+    if (!Array.isArray(oaps) || !stationId) {
+      return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
 
-    // Remove existing OAPs for this station
-    await prisma.oAP.deleteMany({
-      where: { stationId }
-    });
+    const savedOAPs = [];
 
-    // Insert new ones
     for (const oap of oaps) {
-      await prisma.oAP.create({
-        data: oap
-      });
+      const { id, name, bio, photoUrl, shows } = oap;
+      const slug = `${slugify(name)}-${stationId.slice(0, 6)}`;
+
+      if (!name || !photoUrl) continue;
+
+      const data = {
+        name,
+        bio,
+        photoUrl,
+        slug,
+        stationId,
+        shows: Array.isArray(shows) ? shows : [],
+      };
+
+      if (id && id.startsWith("new-")) {
+        // New OAP
+        const created = await prisma.oAP.create({ data });
+        savedOAPs.push(created);
+      } else {
+        // Existing OAP
+        const updated = await prisma.oAP.update({
+          where: { id },
+          data,
+        });
+        savedOAPs.push(updated);
+      }
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ oaps: savedOAPs });
   } catch (err) {
-    console.error("Error saving OAPs:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    console.error("Save OAPs error:", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

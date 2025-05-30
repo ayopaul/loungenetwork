@@ -117,6 +117,36 @@ async function main() {
       });
     }
   }
+
+  // Ensure "Uncategorized" category exists for each station
+  for (const station of stations) {
+    const uncategorizedId = `uncategorized-${station.id}`;
+
+    await prisma.category.upsert({
+      where: { id: uncategorizedId },
+      update: {},
+      create: {
+        id: uncategorizedId,
+        name: "Uncategorized",
+        slug: "uncategorized",
+        visible: true,
+        stationId: station.id,
+      },
+    });
+  }
+
+  // Fix posts with null or missing categoryId using raw SQL
+  for (const station of stations) {
+    const uncategorizedId = `uncategorized-${station.id}`;
+    
+    await prisma.$executeRawUnsafe(`
+      UPDATE "Post"
+      SET "categoryId" = '${uncategorizedId}'
+      WHERE "stationId" = '${station.id}' AND ("categoryId" IS NULL OR "categoryId" = '');
+    `);
+  }
+
+  console.log('✅ Database seeded successfully!');
 }
 
 main().finally(() => prisma.$disconnect());
