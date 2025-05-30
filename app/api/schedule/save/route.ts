@@ -1,3 +1,5 @@
+//app/api/schedule/save/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
@@ -16,9 +18,25 @@ export async function POST(req: NextRequest) {
 
     // Insert new schedule
     for (const entry of schedule) {
+      const { showTitle, slug, startTime, endTime, description, thumbnailUrl, weekday } = entry;
+    
+      if (
+        !showTitle || !slug || !startTime || !endTime ||
+        !description || !thumbnailUrl || typeof weekday !== "number"
+      ) {
+        console.warn("Invalid entry skipped:", entry);
+        continue;
+      }
+    
       await prisma.schedule.create({
         data: {
-          ...entry,
+          showTitle,
+          slug,
+          startTime,
+          endTime,
+          description,
+          thumbnailUrl,
+          weekday,
           stationId
         }
       });

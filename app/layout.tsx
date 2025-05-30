@@ -1,12 +1,5 @@
-// app/layout.tsx
 import "@/styles/globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
-import PlayerDock from "@/components/player/PlayerDock";
-import Navbar from "@/components/layout/Navbar";
-import { Toaster } from "sonner";
-import GlobalAudioProvider from "@/components/player/GlobalAudioProvider";
-
+import { ClientLayout } from "@/components/ClientLayout";
 import { Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({
@@ -30,17 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans">
-        <SessionProviderWrapper>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <GlobalAudioProvider>
-              <div className="min-h-screen bg-background text-foreground">
-                {children}
-              </div>
-              <PlayerDock />
-            </GlobalAudioProvider>
-          </ThemeProvider>
-        </SessionProviderWrapper>
-        <Toaster />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

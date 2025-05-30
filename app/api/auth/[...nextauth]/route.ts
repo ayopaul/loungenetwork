@@ -1,4 +1,3 @@
-// pages/api/auth/[...nextauth].ts
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions } from "next-auth";
@@ -12,7 +11,11 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (credentials?.password === process.env.ADMIN_PASSWORD) {
-          return { id: "admin" };
+          return { 
+            id: "admin",
+            name: "Admin",
+            email: "admin@example.com"
+          };
         }
         return null;
       },
@@ -24,4 +27,5 @@ export const authOptions: AuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export default NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
