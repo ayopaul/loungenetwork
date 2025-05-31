@@ -7,10 +7,10 @@ import type { NextRequest } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!id) {
       return NextResponse.json({ error: "Missing OAP ID" }, { status: 400 });
