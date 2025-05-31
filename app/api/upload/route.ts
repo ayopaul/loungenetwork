@@ -1,5 +1,5 @@
 // app/api/upload/route.ts
-import { writeFile } from "fs/promises";
+import { writeFile, access, constants } from "fs/promises";
 import { mkdirSync, existsSync } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
@@ -37,42 +37,106 @@ export async function POST(req: Request) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uploadDir = path.join(process.cwd(), "public", "oaps");
+    
+    // For standalone deployment, files should go to the standalone public directory
+    // Check multiple possible locations
+    const possibleDirs = [
+      path.join(process.cwd(), "public", "oaps"),  // Current directory
+      path.join("/var/www/loungenetwork", "public", "oaps"),  // Absolute path
+      path.join("/var/www/loungenetwork", ".next", "standalone", "public", "oaps"),  // Standalone
+    ];
+    
+    let uploadDir = "";
+    
+    // Find the correct directory
+    for (const dir of possibleDirs) {
+      try {
+        if (existsSync(path.dirname(dir))) {
+          uploadDir = dir;
+          break;
+        }
+      } catch (e) {
+        // Continue to next option
+      }
+    }
+    
+    if (!uploadDir) {
+      // Default to current working directory + public/oaps
+      uploadDir = path.join(process.cwd(), "public", "oaps");
+    }
+    
+    console.log("🔍 Upload Debug Info:");
+    console.log("- Current working directory:", process.cwd());
+    console.log("- Upload directory:", uploadDir);
+    console.log("- Filename:", filename);
+    console.log("- File size:", file.size);
+    console.log("- File type:", file.type);
     
     // Ensure directory exists
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
+    try {
+      if (!existsSync(uploadDir)) {
+        console.log("📁 Creating upload directory...");
+        mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      // Check if directory is writable
+      await access(uploadDir, constants.W_OK);
+      console.log("✅ Upload directory is writable");
+      
+    } catch (dirError) {
+      console.error("❌ Directory error:", dirError);
+      return NextResponse.json({ 
+        error: "Cannot access upload directory", 
+        details: dirError instanceof Error ? dirError.message : String(dirError) 
+      }, { status: 500 });
     }
 
     const filePath = path.join(uploadDir, filename);
+    console.log("📄 Full file path:", filePath);
     
     try {
       await writeFile(filePath, buffer);
-      console.log(`Successfully saved upload to: ${filePath}`);
+      console.log("✅ Successfully saved file to:", filePath);
+      
+      // Verify file was written
+      try {
+        await access(filePath, constants.R_OK);
+        console.log("✅ File is readable after write");
+      } catch (readError) {
+        console.error("❌ File not readable after write:", readError);
+      }
+      
     } catch (writeError) {
-      console.error("Error writing file:", writeError);
-      return NextResponse.json({ error: "Failed to save file" }, { status: 500 });
+      console.error("❌ Error writing file:", writeError);
+      return NextResponse.json({ 
+        error: "Failed to save file", 
+        details: writeError instanceof Error ? writeError.message : String(writeError) 
+      }, { status: 500 });
     }
 
-    // Generate URL based on environment
-    const baseUrl = process.env.NODE_ENV === "production"
-      ? "https://loungenetwork.ng"
-      : "http://localhost:3000";
-    
-    const fileUrl = `${baseUrl}/oaps/${filename}`;
+    // Generate URL - adjust this based on your domain
+    const fileUrl = `/oaps/${filename}`;
+    console.log("🔗 Generated URL:", fileUrl);
     
     return NextResponse.json({ 
       url: fileUrl,
       filename,
       size: file.size,
-      type: file.type
+      type: file.type,
+      fullPath: filePath, // For debugging
+      debug: {
+        uploadDir,
+        exists: existsSync(filePath)
+      }
     });
     
   } catch (error) {
-    console.error("Upload error:", error);
+    console.error("💥 Upload error:", error);
     return NextResponse.json(
-      { error: "Upload failed", details: error instanceof Error ? error.message : String(error) },
+      { 
+        error: "Upload failed", 
+        details: error instanceof Error ? error.message : String(error) 
+      },
       { status: 500 }
     );
   }
