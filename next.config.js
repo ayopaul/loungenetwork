@@ -13,7 +13,7 @@ const nextConfig = {
   },
   devIndicators: {
     buildActivity: false,
-    buildActivityPosition: 'bottom-right',
+    // Remove this line: buildActivityPosition: 'bottom-right',
   },
 };
 
