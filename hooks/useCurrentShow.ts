@@ -17,42 +17,56 @@ export function useCurrentShow(): Show | null {
 
   useEffect(() => {
     const fetchSchedule = async () => {
-      const res = await fetch("/api/schedule");
-      const text = await res.text();
-      let data: Show[] = [];
       try {
-        data = text ? JSON.parse(text) : [];
-      } catch (e) {
-        data = [];
-      }
-
-      const now = new Date();
-      const currentWeekday = now.getDay(); // Sunday = 0
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-      const todayShows = data.filter((s) => s.weekday === currentWeekday);
-
-      const show = todayShows.find((slot) => {
-        const [sh, sm] = slot.startTime.split(":").map(Number);
-        const [eh, em] = slot.endTime.split(":").map(Number);
-        const start = sh * 60 + sm;
-        const end = eh * 60 + em;
-
-        // Handle overnight show e.g. 20:00 – 00:00
-        if (end <= start) {
-          return currentMinutes >= start || currentMinutes < end;
+        const res = await fetch("/api/schedule");
+        
+        if (!res.ok) {
+          console.error(`❌ API returned ${res.status}: ${res.statusText}`);
+          setCurrentShow(null);
+          return;
         }
 
-        return currentMinutes >= start && currentMinutes < end;
-      });
- // Optional: helpful logging if nothing is matched
-      // if (!currentShow) {
-      //   console.log("⚠️ No current show found");
-      //   console.log("Time:", now.toLocaleTimeString(), "→", currentMinutes, "minutes");
-      //   console.log("Today's shows:", todayShows.map(s => `${s.showTitle} (${s.startTime}–${s.endTime})`));
-      // }
+        const data = await res.json();
+        
+        // Check if we got an error response
+        if (data.error) {
+          console.error("❌ API Error:", data.error);
+          setCurrentShow(null);
+          return;
+        }
 
-      setCurrentShow(show || null);
+        // Ensure we have an array
+        if (!Array.isArray(data)) {
+          console.error("❌ Expected array but got:", typeof data, data);
+          setCurrentShow(null);
+          return;
+        }
+
+        const now = new Date();
+        const currentWeekday = now.getDay(); // Sunday = 0
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const todayShows = data.filter((s: Show) => s.weekday === currentWeekday);
+
+        const show = todayShows.find((slot: Show) => {
+          const [sh, sm] = slot.startTime.split(":").map(Number);
+          const [eh, em] = slot.endTime.split(":").map(Number);
+          const start = sh * 60 + sm;
+          const end = eh * 60 + em;
+
+          // Handle overnight show (e.g. 20:00 – 00:00)
+          if (end <= start) {
+            return currentMinutes >= start || currentMinutes < end;
+          }
+
+          return currentMinutes >= start && currentMinutes < end;
+        });
+
+        setCurrentShow(show || null);
+      } catch (error) {
+        console.error("❌ Failed to fetch or parse schedule:", error);
+        setCurrentShow(null);
+      }
     };
 
     fetchSchedule();

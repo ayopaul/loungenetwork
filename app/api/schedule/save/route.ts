@@ -1,50 +1,117 @@
-//app/api/schedule/save/route.ts
-
+// app/api/schedule/save/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { stationId, schedule } = await req.json();
+    const { stationId, scheduleSlot, schedule } = await req.json();
 
-    if (!stationId || !Array.isArray(schedule)) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    if (!stationId) {
+      return NextResponse.json({ error: "Missing stationId" }, { status: 400 });
     }
 
-    // Remove old schedules
-    await prisma.schedule.deleteMany({
-      where: { stationId }
-    });
-
-    // Insert new schedule
-    for (const entry of schedule) {
-      const { showTitle, slug, startTime, endTime, description, thumbnailUrl, weekday } = entry;
-    
-      if (
-        !showTitle || !slug || !startTime || !endTime ||
-        !description || !thumbnailUrl || typeof weekday !== "number"
-      ) {
-        console.warn("Invalid entry skipped:", entry);
-        continue;
+    // Handle single slot save (preferred)
+    if (scheduleSlot) {
+      const slot = scheduleSlot;
+      
+      if (!slot.showTitle || !slot.startTime || !slot.endTime) {
+        return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
       }
-    
-      await prisma.schedule.create({
-        data: {
-          showTitle,
-          slug,
-          startTime,
-          endTime,
-          description,
-          thumbnailUrl,
-          weekday,
-          stationId
-        }
+
+      // Generate slug if not provided
+      const slug = slot.slug || `${slot.showTitle.toLowerCase().replace(/\s+/g, '-')}-${slot.startTime.replace(':', '')}`;
+
+      const slotData = {
+        showTitle: slot.showTitle,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        description: slot.description || '',
+        thumbnailUrl: slot.thumbnailUrl || '/placeholder-image.svg',
+        weekday: slot.weekday,
+        slug: slug,
+        stationId: stationId,
+      };
+
+      let savedSlot;
+
+      if (slot.id && !slot.id.startsWith('new-')) {
+        // Update existing slot
+        savedSlot = await prisma.schedule.update({
+          where: { id: slot.id },
+          data: slotData,
+        });
+      } else {
+        // Create new slot
+        savedSlot = await prisma.schedule.create({
+          data: {
+            id: `${slug}-${Date.now()}`,
+            ...slotData,
+          },
+        });
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        scheduleSlot: savedSlot 
       });
     }
 
-    return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("Error saving schedule:", err);
-    return NextResponse.json({ error: "Failed to save schedule" }, { status: 500 });
+    // Handle array of slots (legacy support)
+    if (schedule && Array.isArray(schedule)) {
+      const savedSlots = [];
+      
+      for (const slot of schedule) {
+        if (!slot.showTitle || !slot.startTime || !slot.endTime) {
+          continue; // Skip invalid slots
+        }
+
+        const slug = slot.slug || `${slot.showTitle.toLowerCase().replace(/\s+/g, '-')}-${slot.startTime.replace(':', '')}`;
+
+        const slotData = {
+          showTitle: slot.showTitle,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          description: slot.description || '',
+          thumbnailUrl: slot.thumbnailUrl || '/placeholder-image.svg',
+          weekday: slot.weekday,
+          slug: slug,
+          stationId: stationId,
+        };
+
+        let savedSlot;
+
+        if (slot.id && !slot.id.startsWith('new-')) {
+          // Update existing slot
+          savedSlot = await prisma.schedule.update({
+            where: { id: slot.id },
+            data: slotData,
+          });
+        } else {
+          // Create new slot
+          savedSlot = await prisma.schedule.create({
+            data: {
+              id: `${slug}-${Date.now()}`,
+              ...slotData,
+            },
+          });
+        }
+
+        savedSlots.push(savedSlot);
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        schedule: savedSlots 
+      });
+    }
+
+    return NextResponse.json({ error: "No valid data provided" }, { status: 400 });
+
+  } catch (error) {
+    console.error("Schedule save error:", error);
+    return NextResponse.json(
+      { error: "Failed to save schedule" }, 
+      { status: 500 }
+    );
   }
 }

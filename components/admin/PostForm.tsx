@@ -2,6 +2,8 @@
 // this controls the fields admin would use in creating a new content. the content is shown inside the PostDialog
 
 
+// components/admin/PostForm.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -26,9 +28,8 @@ import rehypeRaw from "rehype-raw";
 import YouTube from "@/components/blog/YouTube";
 import MarkdownEditor from "./MarkdownEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useStations } from "@/hooks/useStations"; // make sure this hook fetches all stations
-import { toast } from "@/hooks/use-toast";
-
+import { useStations } from "@/hooks/useStations";
+import { toast } from "sonner";
 
 function PostForm() {
   const { selected, setSelected } = useStationStore();
@@ -96,7 +97,8 @@ function PostForm() {
   };
 
   const handleSave = async () => {
-    if (!selected) return alert("Select a station");
+    if (!selected) return toast.error("Select a station");
+    if (!form.category?.trim()) return toast.error("Please select or enter a category.");
 
     const res = await fetch("/api/blog/save", {
       method: "POST",
@@ -105,8 +107,6 @@ function PostForm() {
     });
 
     if (res.ok) {
-      // Persist new category if not already present
-      // Avoid saving duplicate categories
       if (!categories.includes(form.category)) {
         await fetch("/api/categories/save", {
           method: "POST",
@@ -122,17 +122,15 @@ function PostForm() {
         });
       }
 
-      toast({
-        title: "Post saved",
-        description: "Your blog post was successfully saved.",
+      toast.success("Post saved successfully", {
+        action: {
+          label: "Reload Page",
+          onClick: () => location.reload(),
+        },
       });
       closeDialog();
     } else {
-      toast({
-        title: "Post save failed",
-        description: "Something went wrong while saving your blog post.",
-        variant: "destructive",
-      });
+      toast.error("Something went wrong while saving your blog post.");
     }
   };
 
@@ -145,10 +143,15 @@ function PostForm() {
     });
 
     if (res.ok) {
-      alert("Post deleted.");
+      toast("Post deleted", {
+        action: {
+          label: "Reload Page",
+          onClick: () => location.reload(),
+        },
+      });
       closeDialog();
     } else {
-      alert("Failed to delete post.");
+      toast.error("Failed to delete post.");
     }
   };
 

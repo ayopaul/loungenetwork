@@ -1,7 +1,7 @@
 //components/admin/ScheduleEditor.tsx
 "use client";
 
-import { useEffect, useState, useRef, ChangeEvent } from "react";
+import { useEffect, useState, useRef, ChangeEvent, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,11 +38,24 @@ interface ScheduleEditorProps {
 // Placeholder for your actual image upload API endpoint
 const IMAGE_UPLOAD_API_ENDPOINT = "/api/upload/thumbnail"; // Replace with your actual endpoint
 
+// Debounce utility function
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
+
 export default function ScheduleEditor({ station }: ScheduleEditorProps) {
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState("0");
   const [uploadingThumbnailSlotId, setUploadingThumbnailSlotId] = useState<string | null>(null);
+  const [savingSlots, setSavingSlots] = useState<Set<string>>(new Set());
   // This ref will hold a map of slot IDs to their corresponding HTMLInputElement for file uploads.
   const thumbnailInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -83,31 +96,62 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
     }
   }, [activeDay]); // Dependency array ensures this runs when activeDay changes.
 
+  // Improved updateSlot with debouncing for rapid changes
+  const updateSlotDebounced = useCallback(
+    debounce((id: string, field: keyof ScheduleSlot, value: string | number) => {
+      setSchedule((prev) => {
+        const existingSlot = prev.find(slot => slot.id === id);
+        if (!existingSlot) {
+          console.warn(`Slot with id ${id} not found`);
+          return prev;
+        }
+        
+        return prev.map((slot) =>
+          slot.id === id ? { ...slot, [field]: value } : slot
+        );
+      });
+    }, 300),
+    []
+  );
+
   // Function to update a specific field of a schedule slot.
   const updateSlot = (id: string, field: keyof ScheduleSlot, value: string | number) => {
-    setSchedule((prev) =>
-      prev.map((slot) =>
-        slot.id === id ? { ...slot, [field]: value } : slot
-      )
-    );
+    updateSlotDebounced(id, field, value);
   };
 
-  // Function to add a new, empty schedule slot to the current active day.
+  // Improved handleAddSlot with better ID generation
   const handleAddSlot = () => {
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substr(2, 5);
     const newSlot: ScheduleSlot = {
-      id: `new-${Date.now()}`, // Temporary unique ID for new slots.
+      id: `new-${timestamp}-${randomSuffix}`, // More unique ID
       showTitle: "",
-      startTime: "12:00", // Default start time.
-      endTime: "12:30",   // Default end time.
+      startTime: "12:00",
+      endTime: "12:30",
       description: "",
-      thumbnailUrl: "", // Initially no thumbnail.
-      weekday: Number(activeDay), // Assign to the currently active day.
+      thumbnailUrl: "",
+      weekday: Number(activeDay),
     };
-    setSchedule((prev) => [...prev, newSlot]);
+    
+    setSchedule((prev) => {
+      // Check for duplicate IDs (shouldn't happen but safety check)
+      const existingIds = new Set(prev.map(slot => slot.id));
+      if (existingIds.has(newSlot.id)) {
+        console.warn("Duplicate ID detected, regenerating...");
+        newSlot.id = `new-${Date.now()}-${Math.random().toString(36).substr(2, 8)}`;
+      }
+      return [...prev, newSlot];
+    });
   };
 
-  // Function to save a schedule slot (either new or existing) to the backend.
+  // Improved handleSaveSlot with proper locking and race condition prevention
   const handleSaveSlot = async (slot: ScheduleSlot) => {
+    // Prevent concurrent saves of the same slot
+    if (savingSlots.has(slot.id)) {
+      toast.info("Save already in progress for this show");
+      return;
+    }
+
     // Helper function to generate a URL-friendly slug from text.
     function slugify(text: string): string {
       return text
@@ -136,6 +180,25 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
         toast.error("End Time must be after Start Time.");
         return;
     }
+
+    // Check for duplicate show times on the same day before saving
+    const conflictingSlot = schedule.find(s => 
+      s.id !== slot.id && 
+      s.weekday === slot.weekday && 
+      s.startTime === slot.startTime
+    );
+
+    if (conflictingSlot) {
+      toast.error("Another show is already scheduled at this time");
+      return;
+    }
+
+    // Lock this slot for saving
+    setSavingSlots(prev => new Set(prev).add(slot.id));
+    
+    // Store original slot data for rollback
+    const originalSchedule = [...schedule];
+    const originalSlot = schedule.find(s => s.id === slot.id);
 
     // Prepare the slot data for saving, ensuring safe defaults.
     const safeTitle = slot.showTitle?.trim() || "Untitled Show";
@@ -170,34 +233,64 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
       const savedData = await res.json(); // Response from the server after saving.
       toast.success("Show saved successfully.");
       
-      // Update local state with data from server.
-      // This is important if the server assigns a new ID (for new slots) or modifies data.
-      setSchedule(prev => prev.map(s => {
-        if (s.id === slot.id && savedData.schedule && savedData.schedule.length > 0) {
-            const serverSlot = savedData.schedule[0];
-            // If the original slot ID was a temporary "new-" ID, update it to the server-generated ID.
-            if (slot.id.startsWith("new-") && serverSlot.id) {
-                // Update refs for thumbnail input if ID changes.
+      // Improved state update with proper ID handling
+      setSchedule(prev => {
+        return prev.map(s => {
+          if (s.id === slot.id) {
+            if (savedData.schedule && savedData.schedule.length > 0) {
+              const serverSlot = savedData.schedule[0];
+              
+              // Handle ID change for new slots
+              if (slot.id.startsWith("new-") && serverSlot.id && serverSlot.id !== slot.id) {
+                // Update thumbnail refs with new ID
                 if (thumbnailInputRefs.current[slot.id]) {
-                    thumbnailInputRefs.current[serverSlot.id] = thumbnailInputRefs.current[slot.id];
-                    delete thumbnailInputRefs.current[slot.id]; // Clean up old ref key.
+                  thumbnailInputRefs.current[serverSlot.id] = thumbnailInputRefs.current[slot.id];
+                  delete thumbnailInputRefs.current[slot.id];
                 }
-                return { ...s, ...serverSlot }; // Merge, ensuring new ID is used.
+                
+                // Update saving state with new ID
+                setSavingSlots(current => {
+                  const newSet = new Set(current);
+                  newSet.delete(slot.id);
+                  newSet.add(serverSlot.id);
+                  return newSet;
+                });
+              }
+              
+              return { ...s, ...serverSlot };
             }
-            return { ...s, ...serverSlot }; // Merge with existing slot.
-        }
-        return s;
-      }));
+          }
+          return s;
+        });
+      });
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Something went wrong while saving.";
       console.error("Save error:", err);
       toast.error(errorMessage);
+      
+      // Proper rollback on error
+      if (originalSlot) {
+        setSchedule(originalSchedule);
+      }
+    } finally {
+      // Always unlock the slot
+      setSavingSlots(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(slot.id);
+        return newSet;
+      });
     }
   };
 
   // Function to delete a schedule slot.
   const handleDeleteSlot = async (id: string) => {
+    // Prevent deletion if slot is being saved
+    if (savingSlots.has(id)) {
+      toast.info("Cannot delete while save is in progress");
+      return;
+    }
+
     // If it's a new slot not yet saved to the backend, just remove from UI.
     if (id.startsWith("new-")) {
       setSchedule((prev) => prev.filter((slot) => slot.id !== id));
@@ -451,11 +544,20 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
                     
                     {/* Action Buttons: Delete and Save */}
                     <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-                      <Button variant="outline" size="sm" onClick={() => handleDeleteSlot(slot.id)}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleDeleteSlot(slot.id)}
+                        disabled={savingSlots.has(slot.id)}
+                      >
                         Delete
                       </Button>
-                      <Button size="sm" onClick={() => handleSaveSlot(slot)}>
-                        Save Show
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSaveSlot(slot)}
+                        disabled={savingSlots.has(slot.id)}
+                      >
+                        {savingSlots.has(slot.id) ? "Saving..." : "Save Show"}
                       </Button>
                     </div>
                   </div>

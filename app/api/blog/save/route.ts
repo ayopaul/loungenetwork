@@ -1,27 +1,29 @@
-//app/api/blog/save/route.ts
+// app/api/blog/save/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
+  let stationId: string;
+  let post: any;
+
   try {
-    const { stationId, post } = await req.json();
+    ({ stationId, post } = await req.json());
     post.id = post.id || `${post.slug}-${Date.now()}`;
 
     if (!stationId || !post?.slug) {
       return NextResponse.json({ error: "Missing stationId or slug" }, { status: 400 });
     }
 
-    let categoryId: string | null = null;
+    // --- 🔍 Ensure categoryId is always set ---
+    let categoryId: string;
 
     if (post.category) {
       const slug = post.category.toLowerCase().replace(/\s+/g, "-");
       const existingCategory = await prisma.category.findFirst({
-        where: {
-          slug,
-          stationId
-        }
+        where: { slug, stationId },
       });
+
       if (existingCategory) {
         categoryId = existingCategory.id;
       } else {
@@ -31,63 +33,65 @@ export async function POST(req: NextRequest) {
             name: post.category,
             slug,
             visible: true,
-            stationId
-          }
+            stationId,
+          },
         });
         categoryId = created.id;
       }
-    }
-
-    console.log("📌 Station ID:", stationId);
-    console.log("🪵 Post data:", post);
-
-    try {
-      const updateData = {
-        title: post.title,
-        slug: post.slug,
-        excerpt: post.excerpt || "",
-        content: post.content || "",
-        coverImage: post.coverImage || "",
-        published: post.published || false,
-        stationId: stationId,
-        ...(categoryId ? { categoryId } : {}),
-      };
-
-      const createData: any = {
-        id: post.id,
-        title: post.title,
-        slug: post.slug,
-        excerpt: post.excerpt || "",
-        content: post.content || "",
-        coverImage: post.coverImage || "",
-        published: post.published || false,
-        stationId: stationId,
-      };
-
-      if (categoryId) {
-        createData.categoryId = categoryId;
-      }
-
-      await prisma.post.upsert({
+    } else {
+      // 🔁 Fallback to "Uncategorized"
+      const fallbackSlug = "uncategorized";
+      const fallbackCategory = await prisma.category.upsert({
         where: {
-          id: post.id,
+          slug_stationId: {
+            slug: fallbackSlug,
+            stationId,
+          },
         },
-        update: updateData,
-        create: createData,
+        update: {},
+        create: {
+          id: `${fallbackSlug}-${Date.now()}`,
+          name: "Uncategorized",
+          slug: fallbackSlug,
+          visible: false,
+          stationId,
+        },
       });
-    } catch (err) {
-      console.error("🔥 Prisma post.upsert error:", err);
-      throw err;
+      categoryId = fallbackCategory.id;
     }
 
+    // --- ✅ Save post via upsert ---
+    const updateData = {
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt || "",
+      content: post.content || "",
+      coverImage: post.coverImage || "",
+      published: post.published || false,
+      stationId,
+      categoryId,
+    };
+
+    const createData = {
+      id: post.id,
+      ...updateData,
+    };
+
+    await prisma.post.upsert({
+      where: { id: post.id },
+      update: updateData,
+      create: createData,
+    });
+
+    // --- 📦 Fetch categories after save ---
     const categories = await prisma.category.findMany({
       where: { stationId },
-      orderBy: { name: "asc" }
+      orderBy: { name: "asc" },
     });
 
     return NextResponse.json({ success: true, categories });
   } catch (err) {
-    console.error("Blog save error:", err);
+    console.error("🔥 Blog save error:", err);
     return NextResponse.json({ error: "Failed to save post" }, { status: 500 });
   }
 }
