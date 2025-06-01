@@ -1,4 +1,3 @@
-//components/schedule/WeeklyTabs.tsx
 
 "use client";
 
