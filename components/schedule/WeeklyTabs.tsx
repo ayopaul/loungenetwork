@@ -78,6 +78,10 @@ export default function WeeklyTabs() {
                 <CarouselContent
                   ref={(el) => { carouselRefs.current[index] = el }}
                   className="flex gap-4 no-scrollbar"
+                  style={{
+                    overflowX: "hidden", // Prevent manual scrolling
+                    touchAction: "none",  // Block default gestures (e.g., trackpad swipe)
+                  }}
                 >
                   {shows.map((slot) => {
                     const now = new Date();
