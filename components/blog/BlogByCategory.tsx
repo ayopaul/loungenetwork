@@ -6,11 +6,17 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type Post = {
   id: string;
   title: string;
   slug: string;
-  category: string;
+  category: Category; // This is an object, not a string
   excerpt: string;
   coverImage: string;
   published: boolean;
@@ -24,31 +30,43 @@ export default function BlogByCategory({ limit = 4 }: { limit?: number }) {
     if (!selected?.id) return;
 
     fetch(`/api/blog?stationId=${selected.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const posts = Array.isArray(data) ? data : [];
-        if (!Array.isArray(data)) {
-          console.error("Fetched blog data is not an array:", data);
-        }
-        const filtered = posts.filter((p) => p.published);
-        const groupedByCategory = filtered.reduce((acc: Record<string, Post[]>, post) => {
-          if (!acc[post.category]) acc[post.category] = [];
-          acc[post.category].push(post);
-          return acc;
-        }, {});
-        setGrouped(groupedByCategory);
-      })
-      .catch((err) => {
-        console.error("Failed to load blog posts:", err);
-        setGrouped({});
-      });
+    .then((res) => res.json())
+    .then((data) => {
+      const posts = Array.isArray(data?.posts) ? data.posts : [];
+      if (!Array.isArray(data?.posts)) {
+        console.error("Fetched blog data is not an array:", data);
+      }
+        
+      const filtered = posts.filter((p: Post) => p.published);
+      const groupedByCategory = filtered.reduce((acc: Record<string, Post[]>, post: Post) => {
+        // Fix: Extract category name from the category object
+        const categoryName = post.category?.name || 'Uncategorized';
+        
+        if (!acc[categoryName]) acc[categoryName] = [];
+        acc[categoryName].push(post);
+        return acc;
+      }, {});
+      
+      setGrouped(groupedByCategory);
+    })
+    .catch((err) => {
+      console.error("Failed to load blog posts:", err);
+      setGrouped({});
+    });
   }, [selected]);
 
   if (!selected) return null;
 
+  // Filter out any remaining undefined categories
+  const validGroupedEntries = Object.entries(grouped).filter(
+    ([category]) => category && category !== 'undefined'
+  );
+
+  if (validGroupedEntries.length === 0) return null;
+
   return (
     <section className="space-y-10">
-      {Object.entries(grouped).map(([category, posts]) => (
+      {validGroupedEntries.map(([category, posts]) => (
         <div key={category} className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-foreground">{category}</h3>

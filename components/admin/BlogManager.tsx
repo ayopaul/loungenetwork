@@ -11,14 +11,22 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
+// Updated BlogPost type to match the new category structure
 type BlogPost = {
   id: string;
   title: string;
   slug: string;
-  category: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  categoryId?: string; // Keep for backward compatibility
   excerpt: string;
   coverImage?: string;
   published: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type Category = {
@@ -37,15 +45,49 @@ export default function BlogManager({ station }: BlogManagerProps) {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Fetch posts utility function
+  // Updated fetch posts function to handle new response format
   const fetchPosts = () => {
     if (!station) return;
     setLoading(true);
+    
     fetch(`/api/blog?stationId=${station.id}`)
       .then((res) => res.json())
-      .then((data: BlogPost[]) => {
-        const sorted = [...data].sort((a, b) => b.id.localeCompare(a.id));
-        setPosts(sorted);
+      .then((data) => {
+        console.log("🔍 DEBUG - Blog API Response:", data);
+        
+        // Handle both new format { posts: [...] } and old format [...]
+        let postsArray: BlogPost[] = [];
+        
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.posts)) {
+            // New format: { posts: [...] }
+            postsArray = data.posts;
+          } else if (Array.isArray(data)) {
+            // Old format: [...]
+            postsArray = data;
+          }
+        }
+        
+        console.log("🔍 DEBUG - Processed posts array:", postsArray);
+        
+        // Ensure we have a valid array
+        if (Array.isArray(postsArray)) {
+          const sorted = [...postsArray].sort((a, b) => {
+            // Sort by createdAt if available, otherwise by id
+            if (a.createdAt && b.createdAt) {
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            }
+            return b.id.localeCompare(a.id);
+          });
+          setPosts(sorted);
+        } else {
+          console.warn("Posts data is not in expected format:", data);
+          setPosts([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching posts:", error);
+        setPosts([]);
       })
       .finally(() => setLoading(false));
   };
@@ -63,7 +105,11 @@ export default function BlogManager({ station }: BlogManagerProps) {
     if (station?.id) {
       fetch(`/api/categories/get?stationId=${station.id}`)
         .then((res) => res.json())
-        .then((data) => setCategories(data.categories || []));
+        .then((data) => setCategories(data.categories || []))
+        .catch((error) => {
+          console.error("Error fetching categories:", error);
+          setCategories([]);
+        });
     }
   }, [station?.id]);
 
@@ -79,6 +125,15 @@ export default function BlogManager({ station }: BlogManagerProps) {
       });
     }
     setCategories(updated);
+  };
+
+  // Helper function to get category name
+  const getCategoryName = (post: BlogPost): string => {
+    if (post.category?.name) {
+      return post.category.name;
+    }
+    // Fallback for posts without category relation
+    return 'Uncategorized';
   };
 
   if (!station) return <p className="text-muted-foreground">No station selected.</p>;
@@ -98,7 +153,7 @@ export default function BlogManager({ station }: BlogManagerProps) {
         <TabsContent value="posts">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading posts...</p>
-          ) : posts.length === 0 ? (
+          ) : !Array.isArray(posts) || posts.length === 0 ? (
             <p className="text-muted-foreground">No posts yet.</p>
           ) : (
             <div className="grid gap-4">
@@ -120,7 +175,7 @@ export default function BlogManager({ station }: BlogManagerProps) {
                       <div>
                         <p className="font-semibold">{post.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {post.category} · {post.slug}
+                          {getCategoryName(post)} · {post.slug}
                         </p>
                       </div>
                       <p className="text-sm text-muted-foreground whitespace-nowrap">
@@ -142,21 +197,25 @@ export default function BlogManager({ station }: BlogManagerProps) {
           <div>
             <h3 className="text-lg font-semibold">Manage Category Visibility</h3>
             <div className="space-y-2 mt-2">
-              {categories.map((cat) => (
-                <div key={cat.name} className="flex items-center justify-between border p-2 rounded">
-                  <div>
-                    <div className="font-medium">{cat.name}</div>
-                    <div className="text-sm text-muted-foreground">/{cat.slug}</div>
+              {categories.length === 0 ? (
+                <p className="text-muted-foreground">No categories yet.</p>
+              ) : (
+                categories.map((cat) => (
+                  <div key={cat.name} className="flex items-center justify-between border p-2 rounded">
+                    <div>
+                      <div className="font-medium">{cat.name}</div>
+                      <div className="text-sm text-muted-foreground">/{cat.slug}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label>Visible</Label>
+                      <Switch
+                        checked={cat.visible}
+                        onCheckedChange={() => toggleVisibility(cat.name)}
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Label>Visible</Label>
-                    <Switch
-                      checked={cat.visible}
-                      onCheckedChange={() => toggleVisibility(cat.name)}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </TabsContent>

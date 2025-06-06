@@ -2,6 +2,9 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  experimental: {
+    appDir: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -13,7 +16,6 @@ const nextConfig = {
   },
   devIndicators: {
     buildActivity: false,
-    // Remove this line: buildActivityPosition: 'bottom-right',
   },
 };
 

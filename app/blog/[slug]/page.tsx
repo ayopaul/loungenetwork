@@ -1,5 +1,3 @@
-import fs from "fs/promises";
-import path from "path";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Markdown from "react-markdown";
@@ -9,17 +7,27 @@ import ShareButtons from "@/components/blog/ShareButtons";
 import YouTube from "@/components/blog/YouTube";
 import React from "react";
 import { Metadata } from "next";
+import prisma from "@/lib/prisma";
 
 // --- Types ---
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type Post = {
   id: string;
   title: string;
   slug: string;
-  coverImage: string;
-  excerpt: string;
-  content: string;
-  category: string;
+  excerpt: string | null;
+  content: string | null;
+  coverImage: string | null;
   published: boolean;
+  stationId: string;
+  categoryId: string;
+  category: Category;
+  createdAt: Date;
 };
 
 // --- SEO with async props ---
@@ -43,20 +51,32 @@ export async function generateMetadata(
   };
 }
 
-// --- Data Fetch ---
+// --- Data Fetch from Database ---
 async function getPostBySlug(slug: string): Promise<Post | null> {
-  const filePath = path.join(process.cwd(), "data", "posts.json");
-  const raw = await fs.readFile(filePath, "utf-8");
-  const all = JSON.parse(raw);
+  try {
+    // Since we don't have stationId in the URL, we'll find the first published post with this slug
+    // You might want to add stationId to your URL structure if you have multiple stations
+    const post = await prisma.post.findFirst({
+      where: {
+        slug,
+        published: true,
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
 
-  for (const stationId in all) {
-    const match = Object.values(all[stationId]).find(
-      (p: any) => p.slug === slug
-    );
-    if (match) return match as Post;
+    return post;
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return null;
   }
-
-  return null;
 }
 
 // --- Content Parser ---
@@ -103,7 +123,7 @@ export default async function BlogPostPage(
       <main className="min-h-screen bg-background text-foreground px-4 pt-6 pb-20">
         <article className="max-w-3xl mx-auto">
           <div className="text-sm text-muted-foreground uppercase mb-2">
-            {post.category}
+            {post.category?.name || 'Uncategorized'}
           </div>
           <h1 className="text-4xl font-bold mb-3">{post.title}</h1>
 
@@ -116,7 +136,9 @@ export default async function BlogPostPage(
           )}
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">
-            {renderContentWithYouTubeEmbeds(post.content)}
+            {post.content ? renderContentWithYouTubeEmbeds(post.content) : (
+              <p className="text-muted-foreground">No content available.</p>
+            )}
           </div>
 
           <hr className="my-10 border-border" />

@@ -8,18 +8,28 @@ export async function GET(req: NextRequest) {
 
   if (!stationId) {
     console.warn("No stationId provided — returning empty post list.");
-    return NextResponse.json([]);
+    return NextResponse.json({ posts: [] });
   }
 
   try {
     const posts = await prisma.post.findMany({
       where: { stationId },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      },
       orderBy: { createdAt: "desc" }
     });
-    return NextResponse.json(posts);
+
+    return NextResponse.json({ posts });
   } catch (err) {
     console.error("Blog fetch error:", err);
-    // ✅ Always return an array so frontend logic doesn’t crash
-    return NextResponse.json([], { status: 500 });
+    // ✅ Always return an object with posts array so frontend logic doesn't crash
+    return NextResponse.json({ posts: [] }, { status: 500 });
   }
 }

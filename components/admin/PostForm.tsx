@@ -1,12 +1,9 @@
 // components/admin/PostForm.tsx
-// this controls the fields admin would use in creating a new content. the content is shown inside the PostDialog
-
-
-// components/admin/PostForm.tsx
+// Fixed the category field population and form data handling for PostgreSQL
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,52 +36,100 @@ function PostForm() {
   const [categories, setCategories] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [categoryManuallyChanged, setCategoryManuallyChanged] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
     title: "",
     slug: "",
-    category: "Music",
+    category: "",
     coverImage: "",
     excerpt: "",
     content: "",
     published: false,
   });
 
-  useEffect(() => {
-    if (selected?.id) {
-      Promise.all([
-        fetch(`/api/categories/get?stationId=${selected.id}`).then((res) => res.json()),
-        fetch(`/api/blog?stationId=${selected.id}`).then((res) => res.json())
-      ]).then(([catRes, postRes]) => {
-        const all = (catRes.categories || []);
-        const used = [...new Set((postRes.posts || []).map((p: any) => p.category).filter(Boolean))];
-        const combined = [...new Set([...all.map((c: { name: string }) => c.name), ...used])].sort();
-        setCategories(combined);
-      });
-    }
-  }, [selected?.id]);
+ // 1. Update the categories and posts fetching useEffect:
+useEffect(() => {
+  if (selected?.id) {
+    Promise.all([
+      fetch(`/api/categories/get?stationId=${selected.id}`).then((res) => res.json()),
+      fetch(`/api/blog?stationId=${selected.id}`).then((res) => res.json())
+    ]).then(([catRes, postRes]) => {
+      const all = (catRes.categories || []);
+      // Updated to handle new response structure
+      const posts = postRes.posts || [];
+      const used = [...new Set(posts.map((p: any) => p.category?.name).filter(Boolean))];
+      const combined = [...new Set([...all.map((c: { name: string }) => c.name), ...used])].sort();
+      setCategories(combined);
+    });
+  }
+}, [selected?.id]);
 
-  useEffect(() => {
-    if (isEditMode && selectedPost) {
-      setForm(selectedPost);
-    } else {
-      setForm({
-        id: crypto.randomUUID(),
-        title: "",
-        slug: "",
-        category: "Music",
-        coverImage: "",
-        excerpt: "",
-        content: "",
-        published: false,
-      });
+useEffect(() => {
+  if (isEditMode && selectedPost) {
+    console.log("🔍 DEBUG - Selected post for editing:", selectedPost);
+     // Fix: Ensure the station is set from the post
+  if (selectedPost.stationId && (!selected || selected.id !== selectedPost.stationId)) {
+    const match = stations.find((s) => s.id === selectedPost.stationId);
+    if (match) setSelected(match);
+  }
+    // Handle category extraction - now much simpler!
+    let categoryValue = "";
+    
+    if (selectedPost.category && selectedPost.category.name) {
+      // If category relation is included in the fetch (this is now the standard)
+      categoryValue = selectedPost.category.name;
+      console.log("🔍 DEBUG - Using category relation name:", categoryValue);
     }
-  }, [isEditMode, selectedPost]);
+    
+    console.log("🔍 DEBUG - Final category value:", categoryValue);
+    
+    // Populate form with all available fields from selectedPost
+    setForm({
+      id: selectedPost.id || crypto.randomUUID(),
+      title: selectedPost.title || "",
+      slug: selectedPost.slug || "",
+      category: categoryValue,
+      coverImage: selectedPost.coverImage || selectedPost.cover_image || "",
+      excerpt: selectedPost.excerpt || "",
+      content: selectedPost.content || "",
+      published: selectedPost.published || false,
+    });
+    
+    // Reset the manual change flag when loading a new post
+    setCategoryManuallyChanged(false);
+    
+  } else {
+    console.log("🔍 DEBUG - Creating new post");
+    setCategoryManuallyChanged(false);
+    setForm({
+      id: crypto.randomUUID(),
+      title: "",
+      slug: "",
+      category: "",
+      coverImage: "",
+      excerpt: "",
+      content: "",
+      published: false,
+    });
+  }
+}, [isEditMode, selectedPost?.id]);
 
-  const handleChange = (field: string, value: string | boolean) => {
+  // Use useCallback to prevent unnecessary re-renders
+  const handleChange = useCallback((field: string, value: string | boolean) => {
+    console.log(`🔍 DEBUG - Changing ${field} to:`, value);
     setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  }, []);
+
+  // Separate handler for category selection to prevent station reset
+  const handleCategorySelect = useCallback((categoryValue: string) => {
+    console.log(`🔍 DEBUG - Category selected:`, categoryValue);
+    setForm((prev) => ({ ...prev, category: categoryValue }));
+    setCategoryManuallyChanged(true); // Mark category as manually changed
+    setOpen(false);
+    setSearchTerm("");
+  }, []);
 
   const insertAtCursor = (before: string, after: string = '') => {
     const textarea = document.querySelector("textarea#markdown-content") as HTMLTextAreaElement;
@@ -100,6 +145,9 @@ function PostForm() {
     if (!selected) return toast.error("Select a station");
     if (!form.category?.trim()) return toast.error("Please select or enter a category.");
 
+    console.log("🔍 DEBUG - Saving post with data:", form);
+    console.log("🔍 DEBUG - Category being saved:", form.category);
+
     const res = await fetch("/api/blog/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -107,6 +155,7 @@ function PostForm() {
     });
 
     if (res.ok) {
+      // Save category if it's new
       if (!categories.includes(form.category)) {
         await fetch("/api/categories/save", {
           method: "POST",
@@ -130,6 +179,8 @@ function PostForm() {
       });
       closeDialog();
     } else {
+      const errorData = await res.json().catch(() => ({}));
+      console.error("Save error:", errorData);
       toast.error("Something went wrong while saving your blog post.");
     }
   };
@@ -157,10 +208,22 @@ function PostForm() {
 
   return (
     <div className="space-y-4 bg-background text-foreground p-1">
+      {/* DEBUG: Show current form state */}
+      <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded text-xs">
+        <strong>DEBUG INFO:</strong><br/>
+        Is Edit Mode: {isEditMode ? "Yes" : "No"}<br/>
+        Current Category: "{form.category}"<br/>
+        Available Categories: {categories.join(", ")}<br/>
+        Selected Station: {selected?.name || "None"}<br/>
+        Selected Post ID: {selectedPost?.id || "None"}<br/>
+        Original Post Category Relation: {selectedPost?.category?.name || "None"}<br/>
+        Original Post CategoryId: {selectedPost?.categoryId || "None"}
+      </div>
+
       <div>
         <Label>Station</Label>
         <Select
-          value={selected?.id}
+          value={selected?.id || ""}
           onValueChange={(val) => {
             const match = stations.find((s) => s.id === val);
             if (match) setSelected(match);
@@ -200,18 +263,15 @@ function PostForm() {
                 <CommandInput
                   placeholder="Search or create category..."
                   value={searchTerm}
-                  onValueChange={(val) => setSearchTerm(val)}
+                  onValueChange={setSearchTerm}
                 />
                 <CommandEmpty>
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-left"
-                    onClick={() => {
-                      handleChange("category", searchTerm);
-                      setOpen(false);
-                    }}
+                    onClick={() => handleCategorySelect(searchTerm)}
                   >
-                    Create category “{searchTerm}”
+                    Create category "{searchTerm}"
                   </Button>
                 </CommandEmpty>
                 <CommandGroup>
@@ -219,7 +279,7 @@ function PostForm() {
                     <CommandItem
                       key={cat}
                       value={cat}
-                      onSelect={(val) => handleChange("category", val)}
+                      onSelect={handleCategorySelect}
                     >
                       {cat}
                     </CommandItem>
