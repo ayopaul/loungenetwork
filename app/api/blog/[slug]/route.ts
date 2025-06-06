@@ -4,11 +4,11 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { searchParams } = new URL(req.url);
   const stationId = searchParams.get("stationId");
-  const slug = params.slug;
+  const { slug } = await params; // Changed: await params and destructure
 
   if (!stationId || !slug) {
     return NextResponse.json(
