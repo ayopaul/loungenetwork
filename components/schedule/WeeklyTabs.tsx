@@ -18,7 +18,8 @@ import {
 import { useSchedule } from "@/hooks/useSchedule";
 import ScheduleCard from "@/components/schedule/ScheduleCard";
 import { useStationStore } from "@/stores/useStationStore";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { type CarouselApi } from "@/components/ui/carousel";
 
 const weekdays = [
   { label: "Sunday", value: "0" },
@@ -32,28 +33,68 @@ const weekdays = [
 
 const today = new Date().getDay().toString();
 
-const carouselRefs: { current: (HTMLDivElement | null)[] } = { current: [] };
-
 export default function WeeklyTabs() {
   const { selected } = useStationStore();
   const { schedule, loading } = useSchedule();
+  const carouselApis = useRef<(CarouselApi | undefined)[]>([]);
+  const [scrollStates, setScrollStates] = useState<{[key: number]: {canPrev: boolean, canNext: boolean}}>({});
 
+  // Memoized function to update scroll state
+  const updateScrollState = useCallback((api: CarouselApi, index: number) => {
+    if (!api) return;
+    
+    const canPrev = api.canScrollPrev();
+    const canNext = api.canScrollNext();
+    
+    setScrollStates(prev => {
+      // Only update if values actually changed
+      if (prev[index]?.canPrev === canPrev && prev[index]?.canNext === canNext) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [index]: { canPrev, canNext }
+      };
+    });
+  }, []);
+
+  // useEffect to scroll to live show on today's tab
   useEffect(() => {
+    if (loading || !schedule.length) return;
+
     const todayIndex = weekdays.findIndex((d) => d.value === today);
-    const container = carouselRefs.current[todayIndex];
-    if (!container || schedule.length === 0) return;
-    const liveEl = container.querySelector('[data-live-show="true"]');
-    if (liveEl) {
-      liveEl.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
-    }
-  }, [schedule]);
+    
+    // Wait for carousel to be initialized and schedule to load
+    const timer = setTimeout(() => {
+      const api = carouselApis.current[todayIndex];
+      if (!api || schedule.length === 0) return;
+
+      // Find the live show index
+      const shows = schedule.filter((s) => String(s.weekday) === today);
+      const liveShowIndex = shows.findIndex((slot) => {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const [sh, sm] = slot.startTime.split(":").map(Number);
+        const [eh, em] = slot.endTime.split(":").map(Number);
+        const start = sh * 60 + sm;
+        const end = eh * 60 + em;
+        const isDuringShow = end <= start
+          ? currentMinutes >= start || currentMinutes < end
+          : currentMinutes >= start && currentMinutes < end;
+        return isDuringShow;
+      });
+
+      if (liveShowIndex !== -1) {
+        api.scrollTo(liveShowIndex);
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [schedule, loading]);
 
   if (loading || !selected) {
     return <div className="text-white">{loading ? "Loading schedule..." : "No station selected."}</div>;
-  }
-
-  if (carouselRefs.current.length !== weekdays.length) {
-    carouselRefs.current = Array(weekdays.length).fill(null);
   }
 
   return (
@@ -73,16 +114,44 @@ export default function WeeklyTabs() {
         const shows = schedule.filter((s) => String(s.weekday) === day.value);
         return (
           <TabsContent key={day.value} value={day.value} className="pb-4">
-            <div className="relative w-full px-4 sm:px-6 py-6">
-              <Carousel className="w-full">
-                <CarouselContent
-                  ref={(el) => { carouselRefs.current[index] = el }}
-                  className="flex gap-4 no-scrollbar"
-                  style={{
-                    overflowX: "hidden", // Prevent manual scrolling
-                    touchAction: "none",  // Block default gestures (e.g., trackpad swipe)
-                  }}
-                >
+            <div className="w-full">
+              <Carousel
+                className="w-full touch-pan-x" // Enables horizontal touch scrolling
+                opts={{
+                  align: "start",
+                  skipSnaps: false,
+                  dragFree: false,
+                  containScroll: "trimSnaps", // Prevents scrolling past last item (works for both arrows AND touch)
+                  slidesToScroll: 1,
+                  loop: false,
+                  // Mobile-specific touch options
+                  dragThreshold: 10, // Minimum drag distance to trigger scroll
+                  startIndex: 0,
+                  duration: 25, // Smooth animation duration
+                  // Additional mobile optimizations
+                  watchDrag: true, // Enable drag detection
+                  watchResize: true, // Handle screen rotation
+                }}
+                setApi={(api) => {
+                  carouselApis.current[index] = api;
+                  
+                  if (api) {
+                    // Create event handler with proper cleanup
+                    const handleScrollUpdate = () => updateScrollState(api, index);
+                    
+                    // Add event listeners
+                    api.on('init', handleScrollUpdate);
+                    api.on('scroll', handleScrollUpdate);
+                    api.on('select', handleScrollUpdate);
+                    
+                    // Initial state update
+                    handleScrollUpdate();
+                    
+                    // Cleanup function will be handled by the carousel itself
+                  }
+                }}
+              >
+                <CarouselContent className="-ml-2 md:-ml-4">
                   {shows.map((slot) => {
                     const now = new Date();
                     const todayDay = now.getDay().toString();
@@ -101,24 +170,32 @@ export default function WeeklyTabs() {
                     return (
                       <CarouselItem
                         key={slot.id}
-                        className="basis-1/2 md:basis-1/3 lg:basis-1/4 min-w-[200px] flex-shrink-0"
+                        className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
                         id={`show-${slug}`}
                         data-live-show={isLive ? "true" : undefined}
                       >
-                        <ScheduleCard
-                          title={slot.showTitle}
-                          description={slot.description}
-                          thumbnailUrl={slot.thumbnailUrl}
-                          startTime={slot.startTime}
-                          endTime={slot.endTime}
-                          isLive={isLive}
-                        />
+                        <div className="min-w-[280px] max-w-[320px] mx-auto">
+                          <ScheduleCard
+                            title={slot.showTitle}
+                            description={slot.description}
+                            thumbnailUrl={slot.thumbnailUrl}
+                            startTime={slot.startTime}
+                            endTime={slot.endTime}
+                            isLive={isLive}
+                          />
+                        </div>
                       </CarouselItem>
                     );
                   })}
                 </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
+                <CarouselPrevious 
+                  className={`left-2 ${!scrollStates[index]?.canPrev ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!scrollStates[index]?.canPrev}
+                />
+                <CarouselNext 
+                  className={`right-2 ${!scrollStates[index]?.canNext ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!scrollStates[index]?.canNext}
+                />
               </Carousel>
             </div>
           </TabsContent>

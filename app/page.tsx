@@ -39,7 +39,12 @@ export default function HomePage() {
 
       <main className="flex-grow container mx-auto px-4 py-10">
       <section className="relative overflow-hidden rounded-2xl mb-6">
-          <AuroraBackground className="h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl">
+      <section className="relative overflow-hidden rounded-2xl mb-6">
+          <div className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew.jpg')] bg-cover bg-center">
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#A30C1D] via-[#EC6C79]/70 to-transparent rounded-2xl"></div>
+            
+            {/* Content Layer */}
             <motion.div
               initial={{ opacity: 0.0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -49,25 +54,24 @@ export default function HomePage() {
                 ease: "easeInOut",
               }}
               className="relative z-10 flex flex-col md:flex-row justify-between items-center h-full w-full max-w-7xl px-4 md:px-6 mx-auto pt-8 md:pt-0 gap-4 md:gap-0"
-
             >
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome Home</h1>
-                <p className="text-base text-muted-foreground">
+                <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white">Welcome Home</h1>
+                <p className="text-base text-gray-200">
                   Your sound lives here. Tune in and vibe with Lounge.
                 </p>
                 {/* Social Links */}
-                  <div className="mt-6 flex  gap-6 text-gray-600 dark:text-gray-400">
-                    <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-foreground dark:hover:text-foreground">
-                      <i className="ri-twitter-x-line text-2xl" />
-                    </a>
-                    <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-foreground dark:hover:text-foreground">
-                      <i className="ri-instagram-line text-2xl" />
-                    </a>
-                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-foreground dark:hover:text-foreground">
-                      <i className="ri-youtube-line text-2xl" />
-                    </a>
-                  </div>
+                <div className="mt-6 flex gap-6 text-gray-300">
+                  <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-white transition-colors">
+                    <i className="ri-twitter-x-line text-2xl" />
+                  </a>
+                  <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-white transition-colors">
+                    <i className="ri-instagram-line text-2xl" />
+                  </a>
+                  <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-white transition-colors">
+                    <i className="ri-youtube-line text-2xl" />
+                  </a>
+                </div>
               </div>
 
               {selected && (
@@ -76,7 +80,8 @@ export default function HomePage() {
                 </div>
               )}
             </motion.div>
-          </AuroraBackground>
+          </div>
+        </section>
         </section>
 
 
