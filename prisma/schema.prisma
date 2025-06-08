@@ -33,10 +33,9 @@ model Post {
   published  Boolean  @default(false)
   stationId  String
   station    Station  @relation(fields: [stationId], references: [id])
-  categoryId String   @default("default-category")
-  category   Category @relation("CategoryToPosts", fields: [categoryId], references: [id])
+  categoryId String?  // Make optional
+  category   Category? @relation("CategoryToPosts", fields: [categoryId], references: [id]) // Make optional
   createdAt  DateTime @default(now())
-
   @@unique([slug, stationId], name: "slug_stationId")
 }
 

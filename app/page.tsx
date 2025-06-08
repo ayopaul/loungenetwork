@@ -40,46 +40,47 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-10">
       <section className="relative overflow-hidden rounded-2xl mb-6">
       <section className="relative overflow-hidden rounded-2xl mb-6">
-          <div className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
+      <div className="relative h-[60vh] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#A30C1D] via-[#EC6C79]/70 to-transparent rounded-2xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/70 to-[#000000]/20 rounded-2xl"></div>
             
             {/* Content Layer */}
             <motion.div
-              initial={{ opacity: 0.0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 0.3,
-                duration: 0.8,
-                ease: "easeInOut",
-              }}
-              className="relative z-10 flex flex-col md:flex-row justify-between items-center h-full w-full max-w-7xl px-4 md:px-6 mx-auto pt-8 md:pt-0 gap-4 md:gap-0"
-            >
-              <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white">Welcome Home</h1>
-                <p className="text-base text-gray-200">
-                  Your sound lives here. Tune in and vibe with Lounge.
-                </p>
-                {/* Social Links */}
-                <div className="mt-6 flex gap-6 text-gray-300">
-                  <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-white transition-colors">
-                    <i className="ri-twitter-x-line text-2xl" />
-                  </a>
-                  <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-white transition-colors">
-                    <i className="ri-instagram-line text-2xl" />
-                  </a>
-                  <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-white transition-colors">
-                    <i className="ri-youtube-line text-2xl" />
-                  </a>
+                initial={{ opacity: 0.0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: 0.3,
+                  duration: 0.8,
+                  ease: "easeInOut",
+                }}
+                className="relative z-10 flex flex-col md:flex-row items-center md:items-center justify-center h-full w-full max-w-7xl px-4 md:px-6 mx-auto gap-8"
+              >
+                {/* Left Column – Welcome Text + Socials */}
+                <div className="text-center md:text-left md:w-1/2 space-y-6">
+                  <h1 className="text-4xl md:text-5xl font-bol text-white ">Welcome Home</h1>
+                  <p className="text-base text-gray-200">
+                    Your sound lives here. Tune in and vibe with Lounge.
+                  </p>
+                  <div className="flex justify-center md:justify-start gap-6 text-gray-300">
+                    <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-white transition-colors">
+                      <i className="ri-twitter-x-line text-2xl" />
+                    </a>
+                    <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-white transition-colors">
+                      <i className="ri-instagram-line text-2xl" />
+                    </a>
+                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-white transition-colors">
+                      <i className="ri-youtube-line text-2xl" />
+                    </a>
+                  </div>
                 </div>
-              </div>
 
-              {selected && (
-                <div className="w-full max-w-md mt-6 md:mt-0">
-                  <LivePlayer />
-                </div>
-              )}
-            </motion.div>
+                {/* Right Column – Live Player */}
+                {selected && (
+                  <div className="w-full md:w-1/2 max-w-md pb-[20%] md:pb-0 mt-8 md:mt-0 flex justify-center md:justify-end">
+                    <LivePlayer />
+                  </div>
+                )}
+              </motion.div>
           </div>
         </section>
         </section>

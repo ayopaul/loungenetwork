@@ -25,8 +25,8 @@ type Post = {
   coverImage: string | null;
   published: boolean;
   stationId: string;
-  categoryId: string;
-  category: Category;
+  categoryId: string | null; // Updated to allow null
+  category: Category | null; // Updated to allow null
   createdAt: Date;
 };
 

@@ -21,12 +21,20 @@ export async function POST(req: NextRequest) {
       // Generate slug if not provided
       const slug = slot.slug || `${slot.showTitle.toLowerCase().replace(/\s+/g, '-')}-${slot.startTime.replace(':', '')}`;
 
+      // Handle thumbnail URL - if it's a file path, convert to API URL
+      let thumbnailUrl = slot.thumbnailUrl || '/placeholder-image.svg';
+      if (thumbnailUrl.startsWith('/var/uploads/loungenetwork/shows/')) {
+        // Convert file system path to API URL
+        const relativePath = thumbnailUrl.replace('/var/uploads/loungenetwork/shows/', '');
+        thumbnailUrl = `/api/files/shows/${relativePath}`;
+      }
+
       const slotData = {
         showTitle: slot.showTitle,
         startTime: slot.startTime,
         endTime: slot.endTime,
         description: slot.description || '',
-        thumbnailUrl: slot.thumbnailUrl || '/placeholder-image.svg',
+        thumbnailUrl: thumbnailUrl,
         weekday: slot.weekday,
         slug: slug,
         stationId: stationId,
@@ -67,12 +75,20 @@ export async function POST(req: NextRequest) {
 
         const slug = slot.slug || `${slot.showTitle.toLowerCase().replace(/\s+/g, '-')}-${slot.startTime.replace(':', '')}`;
 
+        // Handle thumbnail URL - if it's a file path, convert to API URL
+        let thumbnailUrl = slot.thumbnailUrl || '/placeholder-image.svg';
+        if (thumbnailUrl.startsWith('/var/uploads/loungenetwork/shows/')) {
+          // Convert file system path to API URL
+          const relativePath = thumbnailUrl.replace('/var/uploads/loungenetwork/shows/', '');
+          thumbnailUrl = `/api/files/shows/${relativePath}`;
+        }
+
         const slotData = {
           showTitle: slot.showTitle,
           startTime: slot.startTime,
           endTime: slot.endTime,
           description: slot.description || '',
-          thumbnailUrl: slot.thumbnailUrl || '/placeholder-image.svg',
+          thumbnailUrl: thumbnailUrl,
           weekday: slot.weekday,
           slug: slug,
           stationId: stationId,
