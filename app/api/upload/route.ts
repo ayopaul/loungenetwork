@@ -4,6 +4,9 @@ import { mkdirSync, existsSync } from "fs";
 import path from "path";
 import { NextResponse } from "next/server";
 
+// Use absolute path outside project directory
+const UPLOAD_BASE_DIR = "/var/uploads/loungenetwork";
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -38,35 +41,10 @@ export async function POST(req: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // For standalone deployment, files should go to the standalone public directory
-    // Check multiple possible locations
-    const possibleDirs = [
-      path.join(process.cwd(), "public", "oaps"),  // Current directory
-      path.join("/var/www/loungenetwork", "public", "oaps"),  // Absolute path
-      path.join("/var/www/loungenetwork", ".next", "standalone", "public", "oaps"),  // Standalone
-    ];
-    
-    let uploadDir = "";
-    
-    // Find the correct directory
-    for (const dir of possibleDirs) {
-      try {
-        if (existsSync(path.dirname(dir))) {
-          uploadDir = dir;
-          break;
-        }
-      } catch (e) {
-        // Continue to next option
-      }
-    }
-    
-    if (!uploadDir) {
-      // Default to current working directory + public/oaps
-      uploadDir = path.join(process.cwd(), "public", "oaps");
-    }
+    // Use external upload directory
+    const uploadDir = path.join(UPLOAD_BASE_DIR, "oaps");
     
     console.log("🔍 Upload Debug Info:");
-    console.log("- Current working directory:", process.cwd());
     console.log("- Upload directory:", uploadDir);
     console.log("- Filename:", filename);
     console.log("- File size:", file.size);
@@ -114,8 +92,8 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
-    // Generate URL - adjust this based on your domain
-    const fileUrl = `/oaps/${filename}`;
+    // Generate URL - will be served by your API route
+    const fileUrl = `/api/files/oaps/${filename}`;
     console.log("🔗 Generated URL:", fileUrl);
     
     return NextResponse.json({ 

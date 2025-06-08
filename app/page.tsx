@@ -40,7 +40,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-10">
       <section className="relative overflow-hidden rounded-2xl mb-6">
       <section className="relative overflow-hidden rounded-2xl mb-6">
-          <div className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew.jpg')] bg-cover bg-center">
+          <div className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#A30C1D] via-[#EC6C79]/70 to-transparent rounded-2xl"></div>
             

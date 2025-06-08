@@ -1,5 +1,5 @@
 // components/admin/PostForm.tsx
-// Fixed the category field population and form data handling for PostgreSQL
+// Enhanced with image upload capabilities
 
 "use client";
 
@@ -19,14 +19,11 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useStationStore } from "@/stores/useStationStore";
 import { useBlogStore } from "../../stores/useBlogStore";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import YouTube from "@/components/blog/YouTube";
-import MarkdownEditor from "./MarkdownEditor";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useStations } from "@/hooks/useStations";
 import { toast } from "sonner";
+import ImageUpload from "./ImageUpload";
+import EnhancedMarkdownEditor from "./EnhancedMarkdownEditor";
 
 function PostForm() {
   const { selected, setSelected } = useStationStore();
@@ -49,72 +46,71 @@ function PostForm() {
     published: false,
   });
 
- // 1. Update the categories and posts fetching useEffect:
-useEffect(() => {
-  if (selected?.id) {
-    Promise.all([
-      fetch(`/api/categories/get?stationId=${selected.id}`).then((res) => res.json()),
-      fetch(`/api/blog?stationId=${selected.id}`).then((res) => res.json())
-    ]).then(([catRes, postRes]) => {
-      const all = (catRes.categories || []);
-      // Updated to handle new response structure
-      const posts = postRes.posts || [];
-      const used = [...new Set(posts.map((p: any) => p.category?.name).filter(Boolean))];
-      const combined = [...new Set([...all.map((c: { name: string }) => c.name), ...used])].sort();
-      setCategories(combined);
-    });
-  }
-}, [selected?.id]);
-
-useEffect(() => {
-  if (isEditMode && selectedPost) {
-    console.log("🔍 DEBUG - Selected post for editing:", selectedPost);
-     // Fix: Ensure the station is set from the post
-  if (selectedPost.stationId && (!selected || selected.id !== selectedPost.stationId)) {
-    const match = stations.find((s) => s.id === selectedPost.stationId);
-    if (match) setSelected(match);
-  }
-    // Handle category extraction - now much simpler!
-    let categoryValue = "";
-    
-    if (selectedPost.category && selectedPost.category.name) {
-      // If category relation is included in the fetch (this is now the standard)
-      categoryValue = selectedPost.category.name;
-      console.log("🔍 DEBUG - Using category relation name:", categoryValue);
+  // Update the categories and posts fetching useEffect:
+  useEffect(() => {
+    if (selected?.id) {
+      Promise.all([
+        fetch(`/api/categories/get?stationId=${selected.id}`).then((res) => res.json()),
+        fetch(`/api/blog?stationId=${selected.id}`).then((res) => res.json())
+      ]).then(([catRes, postRes]) => {
+        const all = (catRes.categories || []);
+        const posts = postRes.posts || [];
+        const used = [...new Set(posts.map((p: any) => p.category?.name).filter(Boolean))];
+        const combined = [...new Set([...all.map((c: { name: string }) => c.name), ...used])].sort();
+        setCategories(combined);
+      });
     }
-    
-    console.log("🔍 DEBUG - Final category value:", categoryValue);
-    
-    // Populate form with all available fields from selectedPost
-    setForm({
-      id: selectedPost.id || crypto.randomUUID(),
-      title: selectedPost.title || "",
-      slug: selectedPost.slug || "",
-      category: categoryValue,
-      coverImage: selectedPost.coverImage || selectedPost.cover_image || "",
-      excerpt: selectedPost.excerpt || "",
-      content: selectedPost.content || "",
-      published: selectedPost.published || false,
-    });
-    
-    // Reset the manual change flag when loading a new post
-    setCategoryManuallyChanged(false);
-    
-  } else {
-    console.log("🔍 DEBUG - Creating new post");
-    setCategoryManuallyChanged(false);
-    setForm({
-      id: crypto.randomUUID(),
-      title: "",
-      slug: "",
-      category: "",
-      coverImage: "",
-      excerpt: "",
-      content: "",
-      published: false,
-    });
-  }
-}, [isEditMode, selectedPost?.id]);
+  }, [selected?.id]);
+
+  useEffect(() => {
+    if (isEditMode && selectedPost) {
+      console.log("🔍 DEBUG - Selected post for editing:", selectedPost);
+      
+      // Fix: Ensure the station is set from the post
+      if (selectedPost.stationId && (!selected || selected.id !== selectedPost.stationId)) {
+        const match = stations.find((s) => s.id === selectedPost.stationId);
+        if (match) setSelected(match);
+      }
+      
+      // Handle category extraction
+      let categoryValue = "";
+      if (selectedPost.category && selectedPost.category.name) {
+        categoryValue = selectedPost.category.name;
+        console.log("🔍 DEBUG - Using category relation name:", categoryValue);
+      }
+      
+      console.log("🔍 DEBUG - Final category value:", categoryValue);
+      
+      // Populate form with all available fields from selectedPost
+      setForm({
+        id: selectedPost.id || crypto.randomUUID(),
+        title: selectedPost.title || "",
+        slug: selectedPost.slug || "",
+        category: categoryValue,
+        coverImage: selectedPost.coverImage || selectedPost.cover_image || "",
+        excerpt: selectedPost.excerpt || "",
+        content: selectedPost.content || "",
+        published: selectedPost.published || false,
+      });
+      
+      // Reset the manual change flag when loading a new post
+      setCategoryManuallyChanged(false);
+      
+    } else {
+      console.log("🔍 DEBUG - Creating new post");
+      setCategoryManuallyChanged(false);
+      setForm({
+        id: crypto.randomUUID(),
+        title: "",
+        slug: "",
+        category: "",
+        coverImage: "",
+        excerpt: "",
+        content: "",
+        published: false,
+      });
+    }
+  }, [isEditMode, selectedPost?.id]);
 
   // Use useCallback to prevent unnecessary re-renders
   const handleChange = useCallback((field: string, value: string | boolean) => {
@@ -126,20 +122,10 @@ useEffect(() => {
   const handleCategorySelect = useCallback((categoryValue: string) => {
     console.log(`🔍 DEBUG - Category selected:`, categoryValue);
     setForm((prev) => ({ ...prev, category: categoryValue }));
-    setCategoryManuallyChanged(true); // Mark category as manually changed
+    setCategoryManuallyChanged(true);
     setOpen(false);
     setSearchTerm("");
   }, []);
-
-  const insertAtCursor = (before: string, after: string = '') => {
-    const textarea = document.querySelector("textarea#markdown-content") as HTMLTextAreaElement;
-    if (!textarea) return;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const newText = text.slice(0, start) + before + text.slice(start, end) + after + text.slice(end);
-    handleChange("content", newText);
-  };
 
   const handleSave = async () => {
     if (!selected) return toast.error("Select a station");
@@ -207,7 +193,7 @@ useEffect(() => {
   };
 
   return (
-    <div className="space-y-4 bg-background text-foreground p-1">
+    <div className="space-y-6 bg-background text-foreground p-4 max-w-4xl mx-auto">
       {/* DEBUG: Show current form state */}
       <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded text-xs">
         <strong>DEBUG INFO:</strong><br/>
@@ -220,6 +206,7 @@ useEffect(() => {
         Original Post CategoryId: {selectedPost?.categoryId || "None"}
       </div>
 
+      {/* Station Selection */}
       <div>
         <Label>Station</Label>
         <Select
@@ -241,15 +228,29 @@ useEffect(() => {
           </SelectContent>
         </Select>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+
+      {/* Title and Slug */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Title</Label>
-          <Input value={form.title} onChange={(e) => handleChange("title", e.target.value)} />
+          <Input 
+            value={form.title} 
+            onChange={(e) => handleChange("title", e.target.value)}
+            placeholder="Enter post title"
+          />
         </div>
         <div> 
           <Label>Slug</Label>
-          <Input value={form.slug} onChange={(e) => handleChange("slug", e.target.value)} />
+          <Input 
+            value={form.slug} 
+            onChange={(e) => handleChange("slug", e.target.value)}
+            placeholder="post-url-slug"
+          />
         </div>
+      </div>
+
+      {/* Category and Cover Image */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Category</Label>
           <Popover open={open} onOpenChange={setOpen}>
@@ -292,84 +293,67 @@ useEffect(() => {
             Type to select a category. If you enter a new one, it will be created automatically.
           </p>
         </div>
+
+        {/* Cover Image Upload */}
         <div>
-          <Label>Cover Image</Label>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                if (typeof reader.result === "string") {
-                  handleChange("coverImage", reader.result);
-                }
-              };
-              reader.readAsDataURL(file);
-            }}
+          <ImageUpload
+            stationId={selected?.id || ""}
+            postId={form.id}
+            type="cover"
+            currentCoverImage={form.coverImage}
+            onCoverImageSet={(url) => handleChange("coverImage", url)}
           />
         </div>
-        {form.coverImage && (
-          <div className="col-span-2">
-            <Label className="block mb-1">Cover Preview</Label>
-            <img src={form.coverImage} className="w-32 h-32 rounded border object-cover" />
-          </div>
-        )}
       </div>
 
+      {/* Excerpt */}
       <div>
         <Label>Excerpt</Label>
         <Textarea
           value={form.excerpt}
           onChange={(e) => handleChange("excerpt", e.target.value)}
+          placeholder="Brief description of your post..."
+          rows={3}
         />
       </div>
 
+      {/* Enhanced Markdown Editor */}
       <div>
-        <Label>Content (Markdown)</Label>
-
-        <div className="flex gap-2 flex-wrap text-sm mb-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => insertAtCursor("**bold**")}>Bold</Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => insertAtCursor("_italic_")}>Italic</Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => insertAtCursor("`code`")}>Code</Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => insertAtCursor("\n## ")}>Heading</Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => insertAtCursor("<YouTube id=\"video_id\" />")}>YouTube</Button>
-        </div>
-
-        <MarkdownEditor
+        <Label className="text-lg font-semibold">Content</Label>
+        <EnhancedMarkdownEditor
           value={form.content}
-          onChange={(val: string) => setForm({ ...form, content: val })}
+          onChange={(val) => handleChange("content", val)}
+          stationId={selected?.id || ""}
+          postId={form.id}
         />
-
-        <div className="mt-4">
-          <Label>Preview</Label>
-          <div className="prose dark:prose-invert bg-muted text-foreground p-4 rounded border max-w-none">
-            <Markdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={
-                {
-                  YouTube: (props: any) => <YouTube id={props.id} />,
-                } as any
-              }
-            >
-              {form.content}
-            </Markdown>
-          </div>
-        </div>
       </div>
 
+      {/* Published Switch */}
       <div className="flex items-center gap-2">
+        <Switch 
+          checked={form.published} 
+          onCheckedChange={(val) => handleChange("published", val)} 
+        />
         <Label>Published</Label>
-        <Switch checked={form.published} onCheckedChange={(val) => handleChange("published", val)} />
+        <span className="text-sm text-muted-foreground">
+          {form.published ? "Post is live" : "Post is draft"}
+        </span>
       </div>
 
-      <div className="flex justify-between pt-4">
-        <Button onClick={handleSave}>{isEditMode ? "Update" : "Create"} Post</Button>
+      {/* Action Buttons */}
+      <div className="flex justify-between items-center pt-6 border-t">
+        <div className="flex gap-2">
+          <Button onClick={handleSave} size="lg">
+            {isEditMode ? "Update" : "Create"} Post
+          </Button>
+          <Button variant="outline" onClick={closeDialog}>
+            Cancel
+          </Button>
+        </div>
+        
         {isEditMode && (
           <Button variant="destructive" onClick={handleDelete}>
-            Delete
+            Delete Post
           </Button>
         )}
       </div>

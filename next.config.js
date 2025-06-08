@@ -1,10 +1,14 @@
-// next.config.js
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  staticPageGenerationTimeout: 120,
+
   experimental: {
     appDir: true,
+    serverComponentsExternalPackages: ['@prisma/client'],
   },
+
   images: {
     remotePatterns: [
       {
@@ -14,6 +18,7 @@ const nextConfig = {
       },
     ],
   },
+
   devIndicators: {
     buildActivity: false,
   },

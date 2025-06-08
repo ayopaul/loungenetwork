@@ -3,8 +3,11 @@ import { NextResponse } from "next/server";
 import { writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
+import { mkdirSync, existsSync } from "fs";
 
-export const dynamic = "force-dynamic"; // required for file uploads in app router
+const UPLOAD_BASE_DIR = "/var/uploads/loungenetwork";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
@@ -20,18 +23,31 @@ export async function POST(req: Request) {
 
     // Create unique filename to avoid collisions
     const filename = `${randomUUID()}-${file.name}`;
-    const uploadDir = path.join(process.cwd(), "public/uploads");
+    const uploadDir = path.join(UPLOAD_BASE_DIR, "general");
     const filepath = path.join(uploadDir, filename);
 
-    // Save the file to /public/uploads
-    await writeFile(filepath, buffer);
+    console.log("🔍 Thumbnail Upload Debug Info:");
+    console.log("- Upload directory:", uploadDir);
+    console.log("- Filename:", filename);
+    console.log("- File size:", file.size);
+    console.log("- File type:", file.type);
 
-    // Return a public URL to the file
-    const publicUrl = `/uploads/${filename}`;
+    // Ensure directory exists
+    if (!existsSync(uploadDir)) {
+      console.log("📁 Creating thumbnail upload directory...");
+      mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // Save the file
+    await writeFile(filepath, buffer);
+    console.log("✅ Successfully saved thumbnail to:", filepath);
+
+    // Return URL to be served by API route
+    const publicUrl = `/api/files/general/${filename}`;
 
     return NextResponse.json({ thumbnailUrl: publicUrl });
   } catch (err) {
-    console.error("Upload error:", err);
+    console.error("💥 Thumbnail upload error:", err);
     return NextResponse.json({ message: "Server error during upload." }, { status: 500 });
   }
 }
