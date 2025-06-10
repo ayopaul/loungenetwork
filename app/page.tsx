@@ -40,7 +40,7 @@ export default function HomePage() {
       <main className="flex-grow container mx-auto px-4 py-10">
       <section className="relative overflow-hidden rounded-2xl mb-6">
       <section className="relative overflow-hidden rounded-2xl mb-6">
-      <div className="relative h-[60vh] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
+      <div className="relative min-h-[500px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/70 to-[#000000]/20 rounded-2xl"></div>
             
@@ -53,11 +53,11 @@ export default function HomePage() {
                   duration: 0.8,
                   ease: "easeInOut",
                 }}
-                className="relative z-10 flex flex-col md:flex-row items-center md:items-center justify-center h-full w-full max-w-7xl px-4 md:px-6 mx-auto gap-8"
+                className="relative z-10 flex flex-col md:flex-row items-center md:items-center justify-center h-full w-full max-w-7xl px-4 py-10 md:px-6 mx-auto gap-8"
               >
                 {/* Left Column – Welcome Text + Socials */}
                 <div className="text-center md:text-left md:w-1/2 space-y-6">
-                  <h1 className="text-4xl md:text-5xl font-bol text-white ">Welcome Home</h1>
+                  <h1 className="text-4xl md:text-5xl font-bold text-white ">Welcome Home</h1>
                   <p className="text-base text-gray-200">
                     Your sound lives here. Tune in and vibe with Lounge.
                   </p>
@@ -76,9 +76,11 @@ export default function HomePage() {
 
                 {/* Right Column – Live Player */}
                 {selected && (
-                  <div className="w-full md:w-1/2 max-w-md pb-[20%] md:pb-0 mt-8 md:mt-0 flex justify-center md:justify-end">
+                  <div className="w-full md:w-1/2 max-w-md px-4 pb-[20%] md:px-0 md:pb-0 mt-8 md:mt-0 flex justify-center md:justify-end">
                     <LivePlayer />
                   </div>
+                
+                
                 )}
               </motion.div>
           </div>
