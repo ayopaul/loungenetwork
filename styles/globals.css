@@ -83,3 +83,12 @@ h1 {
   -webkit-background-clip: text;
   color: transparent;
 }
+
+/* Hero gradient overlay that switches based on theme */
+.bg-gradient-overlay {
+  background: linear-gradient(to top, white, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.2));
+}
+
+.dark .bg-gradient-overlay {
+  background: linear-gradient(to top, black, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.2));
+}

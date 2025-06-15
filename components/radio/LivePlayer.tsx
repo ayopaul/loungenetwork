@@ -27,11 +27,11 @@ export default function LivePlayer() {
       </CardHeader>
 
       <CardContent className="flex items-center gap-4">
-        <div className="relative">
+        <div className="relative w-[30vw] max-w-[96px] aspect-square rounded-lg overflow-hidden">
           <img
             src={show.thumbnailUrl}
             alt={show.showTitle}
-            className="w-24 h-24 rounded-lg object-cover"
+            className="w-full h-full object-cover"
           />
           <button
             onClick={togglePlayback}

@@ -38,14 +38,14 @@ export default function HomePage() {
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-10">
-      <section className="relative overflow-hidden rounded-2xl mb-6">
-      <section className="relative overflow-hidden rounded-2xl mb-6">
-      <div className="relative min-h-[500px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/70 to-[#000000]/20 rounded-2xl"></div>
-            
-            {/* Content Layer */}
-            <motion.div
+    
+          <section className="relative overflow-hidden rounded-2xl mb-6">
+            <div className="relative min-h-[500px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl bg-[url('/media/radio-crew-bg.jpg')] bg-cover bg-center">
+              {/* Theme-aware Gradient Overlay */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-overlay"></div>
+              
+              {/* Content Layer */}
+              <motion.div
                 initial={{ opacity: 0.0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{
@@ -57,18 +57,21 @@ export default function HomePage() {
               >
                 {/* Left Column – Welcome Text + Socials */}
                 <div className="text-center md:text-left md:w-1/2 space-y-6">
-                  <h1 className="text-4xl md:text-5xl font-bold text-white ">Welcome Home</h1>
-                  <p className="text-base text-gray-200">
+                  {/* Override the default h1 gradient for this specific heading */}
+                  <h1 className="text-4xl md:text-5xl font-bold !bg-none !text-black dark:!text-white">
+                    Welcome Home
+                  </h1>
+                  <p className="text-base text-gray-800 dark:text-gray-200">
                     Your sound lives here. Tune in and vibe with Lounge.
                   </p>
-                  <div className="flex justify-center md:justify-start gap-6 text-gray-300">
-                    <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-white transition-colors">
+                  <div className="flex justify-center md:justify-start gap-6 text-gray-700 dark:text-gray-300">
+                    <a href="https://x.com" target="_blank" aria-label="X" className="hover:text-black dark:hover:text-white transition-colors">
                       <i className="ri-twitter-x-line text-2xl" />
                     </a>
-                    <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-white transition-colors">
+                    <a href="https://instagram.com" target="_blank" aria-label="Instagram" className="hover:text-black dark:hover:text-white transition-colors">
                       <i className="ri-instagram-line text-2xl" />
                     </a>
-                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-white transition-colors">
+                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" className="hover:text-black dark:hover:text-white transition-colors">
                       <i className="ri-youtube-line text-2xl" />
                     </a>
                   </div>
@@ -76,24 +79,13 @@ export default function HomePage() {
 
                 {/* Right Column – Live Player */}
                 {selected && (
-                  <div className="w-full md:w-1/2 max-w-md px-4 pb-[20%] md:px-0 md:pb-0 mt-8 md:mt-0 flex justify-center md:justify-end">
+                 <div className="w-full md:w-1/2 max-w-md px-4 md:px-0 mt-8 md:mt-0 flex justify-center md:justify-end">
                     <LivePlayer />
                   </div>
-                
-                
                 )}
               </motion.div>
-          </div>
-        </section>
-        </section>
-
-
-
-        <section className="mb-20">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-            {selected && <WeeklyTabs />}
-          </div>
-        </section>
+            </div>
+          </section>
 
         <div className="bg-[url('/bank-note.svg')] bg-cover" />
         <BlogByCategory limit={4} />
