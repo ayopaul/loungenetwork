@@ -86,7 +86,11 @@ export default function HomePage() {
               </motion.div>
             </div>
           </section>
-
+          <section className="mb-20">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+            {selected && <WeeklyTabs />}
+          </div>
+        </section> 
         <div className="bg-[url('/bank-note.svg')] bg-cover" />
         <BlogByCategory limit={4} />
       </main>

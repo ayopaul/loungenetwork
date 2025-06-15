@@ -116,21 +116,20 @@ export default function WeeklyTabs() {
           <TabsContent key={day.value} value={day.value} className="pb-4">
             <div className="w-full">
               <Carousel
-                className="w-full touch-pan-x" // Enables horizontal touch scrolling
+                className="w-full pointer-events-none md:pointer-events-auto"
                 opts={{
                   align: "start",
                   skipSnaps: false,
                   dragFree: false,
-                  containScroll: "trimSnaps", // Prevents scrolling past last item (works for both arrows AND touch)
+                  containScroll: "trimSnaps",
                   slidesToScroll: 1,
                   loop: false,
-                  // Mobile-specific touch options
-                  dragThreshold: 10, // Minimum drag distance to trigger scroll
+                  // Completely disable all drag interactions
+                  dragThreshold: 999,
                   startIndex: 0,
-                  duration: 25, // Smooth animation duration
-                  // Additional mobile optimizations
-                  watchDrag: true, // Enable drag detection
-                  watchResize: true, // Handle screen rotation
+                  duration: 25,
+                  watchDrag: false,
+                  watchResize: true,
                 }}
                 setApi={(api) => {
                   carouselApis.current[index] = api;
@@ -151,7 +150,8 @@ export default function WeeklyTabs() {
                   }
                 }}
               >
-                <CarouselContent className="-ml-2 md:-ml-4">
+                {/* Add padding to prevent red outline from being cut off */}
+                <CarouselContent className="-ml-2 md:-ml-4 py-1">
                   {shows.map((slot) => {
                     const now = new Date();
                     const todayDay = now.getDay().toString();
@@ -170,11 +170,12 @@ export default function WeeklyTabs() {
                     return (
                       <CarouselItem
                         key={slot.id}
-                        className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                        className="pl-2 md:pl-4 basis-[65%] sm:basis-[48%] md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
                         id={`show-${slug}`}
                         data-live-show={isLive ? "true" : undefined}
                       >
-                        <div className="min-w-[280px] max-w-[320px] mx-auto">
+                        {/* Add margin to prevent red outline from being cut off */}
+                        <div className={`w-full max-w-[320px] mx-auto ${isLive ? 'm-1' : ''}`}>
                           <ScheduleCard
                             title={slot.showTitle}
                             description={slot.description}
@@ -189,11 +190,11 @@ export default function WeeklyTabs() {
                   })}
                 </CarouselContent>
                 <CarouselPrevious 
-                  className={`left-2 ${!scrollStates[index]?.canPrev ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`left-2 pointer-events-auto ${!scrollStates[index]?.canPrev ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={!scrollStates[index]?.canPrev}
                 />
                 <CarouselNext 
-                  className={`right-2 ${!scrollStates[index]?.canNext ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`right-2 pointer-events-auto ${!scrollStates[index]?.canNext ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={!scrollStates[index]?.canNext}
                 />
               </Carousel>
