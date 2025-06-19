@@ -50,12 +50,19 @@ export default function LivePlayer() {
         </div>
 
         <div className="space-y-1 overflow-hidden">
-          <p className="text-lg font-semibold truncate">{show.showTitle}</p>
           <div
-            className="relative max-w-[90vw] sm:max-w-[200px] text-center sm:text-left cursor-pointer"
+            className="relative max-w-[200px] text-center sm:text-left cursor-pointer"
             onClick={() => setExpanded(!expanded)}
           >
-            <p className={`text-sm text-white/70 ${expanded ? '' : 'line-clamp-2'}`}>
+            <p className={`text-lg font-semibold text-justify ${expanded ? '' : 'truncate'}`}>
+              {show.showTitle}
+            </p>
+          </div>
+          <div
+            className="relative max-w-[200px] text-center sm:text-left cursor-pointer"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <p className={`text-sm text-white/70 text-justify ${expanded ? '' : 'line-clamp-2'}`}>
               {show.description}
             </p>
           </div>
