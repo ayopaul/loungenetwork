@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCurrentShow } from "@/hooks/useCurrentShow";
 import { useStationStore } from "@/stores/useStationStore";
 import { useGlobalAudio } from "@/stores/useGlobalAudio";
@@ -11,6 +12,8 @@ export default function LivePlayer() {
   const { selected } = useStationStore();
   const { isPlaying, togglePlayback } = useGlobalAudio();
   const show = useCurrentShow();
+
+  const [expanded, setExpanded] = useState(false);
 
   if (!selected || !show) return null;
 
@@ -48,7 +51,14 @@ export default function LivePlayer() {
 
         <div className="space-y-1 overflow-hidden">
           <p className="text-lg font-semibold truncate">{show.showTitle}</p>
-          <p className="text-sm text-white/70 truncate">{show.description}</p>
+          <div
+            className="relative max-w-[90vw] sm:max-w-[200px] text-center sm:text-left cursor-pointer"
+            onClick={() => setExpanded(!expanded)}
+          >
+            <p className={`text-sm text-white/70 ${expanded ? '' : 'line-clamp-2'}`}>
+              {show.description}
+            </p>
+          </div>
           <p className="text-xs text-white/60">
             {show.startTime} – {show.endTime}
           </p>
