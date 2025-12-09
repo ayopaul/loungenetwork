@@ -1,8 +1,12 @@
 // app/api/schedule/delete/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/apiAuth";
 
 export async function DELETE(req: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const { stationId, scheduleSlotId } = await req.json();
 

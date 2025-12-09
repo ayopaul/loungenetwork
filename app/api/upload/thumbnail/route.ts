@@ -4,50 +4,59 @@ import { writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 import { mkdirSync, existsSync } from "fs";
+import { requireAuth, sanitizePath } from "@/lib/apiAuth";
 
 const UPLOAD_BASE_DIR = "/var/uploads/loungenetwork";
+const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const formData = await req.formData();
     const file = formData.get("thumbnail") as File;
 
     if (!file) {
-      return NextResponse.json({ message: "No file uploaded." }, { status: 400 });
+      return NextResponse.json({ error: "No file uploaded." }, { status: 400 });
+    }
+
+    // Validate file type
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: "Invalid file type. Only images are allowed." }, { status: 400 });
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "File too large. Maximum size is 5MB." }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create unique filename to avoid collisions
-    const filename = `${randomUUID()}-${file.name}`;
+    // Create unique filename with sanitized original name
+    const safeOriginalName = sanitizePath(file.name).replace(/[^a-zA-Z0-9.-]/g, '-');
+    const filename = `${randomUUID()}-${safeOriginalName}`;
     const uploadDir = path.join(UPLOAD_BASE_DIR, "general");
     const filepath = path.join(uploadDir, filename);
 
-    console.log("🔍 Thumbnail Upload Debug Info:");
-    console.log("- Upload directory:", uploadDir);
-    console.log("- Filename:", filename);
-    console.log("- File size:", file.size);
-    console.log("- File type:", file.type);
-
     // Ensure directory exists
     if (!existsSync(uploadDir)) {
-      console.log("📁 Creating thumbnail upload directory...");
       mkdirSync(uploadDir, { recursive: true });
     }
 
     // Save the file
     await writeFile(filepath, buffer);
-    console.log("✅ Successfully saved thumbnail to:", filepath);
 
     // Return URL to be served by API route
     const publicUrl = `/api/files/general/${filename}`;
 
     return NextResponse.json({ thumbnailUrl: publicUrl });
   } catch (err) {
-    console.error("💥 Thumbnail upload error:", err);
-    return NextResponse.json({ message: "Server error during upload." }, { status: 500 });
+    console.error("Thumbnail upload error:", err);
+    return NextResponse.json({ error: "Server error during upload." }, { status: 500 });
   }
 }

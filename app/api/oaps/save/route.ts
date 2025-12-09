@@ -1,6 +1,7 @@
 // app/api/oaps/save/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/apiAuth";
 
 // Utility to generate a slug
 function slugify(text: string): string {
@@ -13,6 +14,9 @@ function slugify(text: string): string {
 }
 
 export async function POST(req: Request) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const { oaps, stationId } = await req.json();
 

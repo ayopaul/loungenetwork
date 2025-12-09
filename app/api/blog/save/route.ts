@@ -1,8 +1,12 @@
 // app/api/blog/save/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/apiAuth";
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   let stationId: string;
   let post: any;
 

@@ -4,25 +4,32 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { requireAuth, sanitizePath, isPathSafe } from '@/lib/apiAuth';
 
 const UPLOAD_DIR = '/var/uploads/loungenetwork/shows';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const showId = formData.get('showId') as string;
+    const rawShowId = formData.get('showId') as string;
     const category = formData.get('category') as string || 'thumbnail'; // thumbnail, banner, etc.
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    if (!showId) {
+    if (!rawShowId) {
       return NextResponse.json({ error: 'Show ID is required' }, { status: 400 });
     }
+
+    // Sanitize showId to prevent directory traversal
+    const showId = sanitizePath(rawShowId);
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -47,6 +54,12 @@ export async function POST(request: NextRequest) {
 
     // Create show-specific directory
     const showDir = path.join(UPLOAD_DIR, showId);
+
+    // Verify path is safe before creating directory
+    if (!isPathSafe(showDir, UPLOAD_DIR)) {
+      return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+    }
+
     if (!existsSync(showDir)) {
       await mkdir(showDir, { recursive: true });
     }
@@ -66,35 +79,15 @@ export async function POST(request: NextRequest) {
     // Generate the URL that will be used to access this file
     const fileUrl = `/api/files/shows/${showId}/${fileName}`;
 
-    console.log('Show file uploaded successfully:', {
-      showId,
-      category,
-      originalName: file.name,
-      fileName,
-      filePath,
-      fileUrl,
-      size: file.size,
-      type: file.type
-    });
-
     return NextResponse.json({
       success: true,
       fileName,
       fileUrl,
       size: file.size,
-      type: file.type,
-      showId,
-      category
+      type: file.type
     });
 
-  } catch (error) {
-    console.error('Show file upload error:', error);
-    return NextResponse.json(
-      { 
-        error: 'Failed to upload file',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
   }
 }

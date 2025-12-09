@@ -4,24 +4,32 @@ import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 import { lookup } from 'mime-types';
+import { requireAuth, sanitizePath, isPathSafe } from '@/lib/apiAuth';
 
 const UPLOAD_DIR = '/var/uploads/loungenetwork/blog';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const stationId = formData.get('stationId') as string;
-    const postId = formData.get('postId') as string;
+    const rawStationId = formData.get('stationId') as string;
+    const rawPostId = formData.get('postId') as string;
     const type = formData.get('type') as string; // 'cover' or 'content'
 
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    if (!stationId) {
+    if (!rawStationId) {
       return NextResponse.json({ error: 'Station ID required' }, { status: 400 });
     }
+
+    // Sanitize path parameters to prevent directory traversal
+    const stationId = sanitizePath(rawStationId);
+    const postId = rawPostId ? sanitizePath(rawPostId) : '';
 
     // Validate file type
     const mimeType = lookup(file.name);
@@ -32,6 +40,11 @@ export async function POST(request: NextRequest) {
     // Create directory structure: /var/uploads/loungenetwork/blog/{stationId}/{postId}/
     const stationDir = path.join(UPLOAD_DIR, stationId);
     const postDir = postId ? path.join(stationDir, postId) : stationDir;
+
+    // Verify paths are safe
+    if (!isPathSafe(stationDir, UPLOAD_DIR) || (postId && !isPathSafe(postDir, UPLOAD_DIR))) {
+      return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+    }
     
     if (!existsSync(stationDir)) {
       await mkdir(stationDir, { recursive: true });
@@ -82,19 +95,32 @@ export async function POST(request: NextRequest) {
 
 // Optional: Handle DELETE requests for image cleanup
 export async function DELETE(request: NextRequest) {
+  const auth = await requireAuth();
+  if (!auth.authorized) return auth.response;
+
   try {
     const { searchParams } = new URL(request.url);
-    const stationId = searchParams.get('stationId');
-    const postId = searchParams.get('postId');
-    const filename = searchParams.get('filename');
+    const rawStationId = searchParams.get('stationId');
+    const rawPostId = searchParams.get('postId');
+    const rawFilename = searchParams.get('filename');
 
-    if (!stationId || !filename) {
+    if (!rawStationId || !rawFilename) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    const filePath = postId 
+    // Sanitize all path components
+    const stationId = sanitizePath(rawStationId);
+    const postId = rawPostId ? sanitizePath(rawPostId) : '';
+    const filename = sanitizePath(rawFilename);
+
+    const filePath = postId
       ? path.join(UPLOAD_DIR, stationId, postId, filename)
       : path.join(UPLOAD_DIR, stationId, filename);
+
+    // Verify path is safe before deletion
+    if (!isPathSafe(filePath, UPLOAD_DIR)) {
+      return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
+    }
 
     if (existsSync(filePath)) {
       const { unlink } = await import('fs/promises');

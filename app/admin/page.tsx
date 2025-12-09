@@ -16,10 +16,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "sonner";
-<Toaster richColors position="top-right" />
-
-
 
 export default function AdminSettingsPage() {
   const [stations, setStations] = useState<Station[]>([]);

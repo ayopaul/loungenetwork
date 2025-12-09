@@ -1,21 +1,24 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export function AdminAuthWrapper({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.replace("/admin/login");
+      // Use window.location for full page reload to ensure middleware runs
+      window.location.href = "/admin/login";
     }
-  }, [status, router]);
+  }, [status]);
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
   if (!session) {
