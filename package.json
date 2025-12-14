@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "prisma generate && next build",
-        "postbuild": "rsync -a public/uploads/ .next/standalone/public/uploads/ && rsync -a public/oaps/ .next/standalone/public/oaps/",
+        "postbuild": "mkdir -p .next/standalone/public/uploads .next/standalone/public/oaps && cp -r public/uploads/. .next/standalone/public/uploads/ 2>/dev/null || true && cp -r public/oaps/. .next/standalone/public/oaps/ 2>/dev/null || true",
         "start": "node .next/standalone/server.js",
         "lint": "next lint"
     },
