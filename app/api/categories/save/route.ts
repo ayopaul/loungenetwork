@@ -1,8 +1,8 @@
 // app/api/categories/save/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { requireAuth } from "@/lib/apiAuth";
+import type { Category } from "@/types/supabase";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth();
@@ -14,33 +14,49 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing stationId or category name" }, { status: 400 });
   }
 
-  // Check for duplicate (case-insensitive) name
-  const existing = await prisma.category.findMany({
-    where: {
-      stationId,
-      name: {
-        equals: category.name,
-        mode: "insensitive"
-      }
+  try {
+    // Check for duplicate (case-insensitive) name
+    const { data: existing } = await supabaseAdmin
+      .from("categories")
+      .select("*")
+      .eq("station_id", stationId)
+      .ilike("name", category.name);
+
+    if (!existing || existing.length === 0) {
+      const { error: insertError } = await supabaseAdmin
+        .from("categories")
+        .insert({
+          id: category.id,
+          name: category.name,
+          slug: category.slug,
+          visible: category.visible ?? false,
+          station_id: stationId,
+        });
+
+      if (insertError) throw insertError;
     }
-  });
 
-  if (existing.length === 0) {
-    await prisma.category.create({
-      data: {
-        id: category.id,
-        name: category.name,
-        slug: category.slug,
-        visible: category.visible ?? false,
-        stationId
-      }
-    });
+    // Fetch updated categories
+    const { data: categories, error: fetchError } = await supabaseAdmin
+      .from("categories")
+      .select("*")
+      .eq("station_id", stationId)
+      .order("name", { ascending: true });
+
+    if (fetchError) throw fetchError;
+
+    // Transform snake_case to camelCase for API response
+    const transformedCategories = ((categories || []) as Category[]).map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      visible: c.visible,
+      stationId: c.station_id,
+    }));
+
+    return NextResponse.json({ success: true, categories: transformedCategories });
+  } catch (err) {
+    console.error("Category save error:", err);
+    return NextResponse.json({ error: "Failed to save category" }, { status: 500 });
   }
-
-  const categories = await prisma.category.findMany({
-    where: { stationId },
-    orderBy: { name: "asc" }
-  });
-
-  return NextResponse.json({ success: true, categories });
 }

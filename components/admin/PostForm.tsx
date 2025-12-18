@@ -128,84 +128,96 @@ function PostForm() {
   }, []);
 
   const handleSave = async () => {
-    if (!selected) return toast.error("Select a station");
-    if (!form.category?.trim()) return toast.error("Please select or enter a category.");
+    if (!selected) {
+      toast.error("Select a station");
+      return;
+    }
+    if (!form.category?.trim()) {
+      toast.error("Please select or enter a category.");
+      return;
+    }
 
     console.log("🔍 DEBUG - Saving post with data:", form);
     console.log("🔍 DEBUG - Category being saved:", form.category);
 
-    const res = await fetch("/api/blog/save", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stationId: selected.id, post: form }),
-    });
-
-    if (res.ok) {
-      // Save category if it's new
-      if (!categories.includes(form.category)) {
-        await fetch("/api/categories/save", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            stationId: selected.id,
-            category: {
-              name: form.category,
-              slug: form.category.toLowerCase().replace(/\s+/g, "-"),
-              visible: false
-            }
-          })
-        });
-      }
-
-      toast.success("Post saved successfully", {
-        action: {
-          label: "Reload Page",
-          onClick: () => location.reload(),
-        },
+    try {
+      const res = await fetch("/api/blog/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stationId: selected.id, post: form }),
       });
-      closeDialog();
-    } else {
-      const errorData = await res.json().catch(() => ({}));
-      console.error("Save error:", errorData);
-      toast.error("Something went wrong while saving your blog post.");
+
+      if (res.ok) {
+        // Save category if it's new
+        if (!categories.includes(form.category)) {
+          await fetch("/api/categories/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              stationId: selected.id,
+              category: {
+                name: form.category,
+                slug: form.category.toLowerCase().replace(/\s+/g, "-"),
+                visible: false
+              }
+            })
+          });
+        }
+
+        toast.success("Post saved successfully");
+        closeDialog();
+        window.dispatchEvent(new Event("blog-post-saved"));
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Save error:", errorData);
+        toast.error(errorData.error || "Something went wrong while saving your blog post.");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Network error while saving post");
     }
   };
 
   const handleDelete = async () => {
-    if (!selected) return;
-    const res = await fetch(`/api/blog/delete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stationId: selected.id, slug: form.slug }),
-    });
+    if (!selected) {
+      toast.error("No station selected");
+      return;
+    }
 
-    if (res.ok) {
-      toast("Post deleted", {
-        action: {
-          label: "Reload Page",
-          onClick: () => location.reload(),
-        },
+    if (!form.slug) {
+      toast.error("Cannot delete: post has no slug");
+      return;
+    }
+
+    // Confirm before deleting
+    if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/blog/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stationId: selected.id, slug: form.slug }),
       });
-      closeDialog();
-    } else {
-      toast.error("Failed to delete post.");
+
+      if (res.ok) {
+        toast.success("Post deleted successfully");
+        closeDialog();
+        window.dispatchEvent(new Event("blog-post-saved"));
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        console.error("Delete error:", errorData);
+        toast.error(errorData.error || "Failed to delete post");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Network error while deleting post");
     }
   };
 
   return (
     <div className="space-y-6 bg-background text-foreground p-4 max-w-4xl mx-auto">
-      {/* DEBUG: Show current form state */}
-      <div className="bg-yellow-100 dark:bg-yellow-900 p-2 rounded text-xs">
-        <strong>DEBUG INFO:</strong><br/>
-        Is Edit Mode: {isEditMode ? "Yes" : "No"}<br/>
-        Current Category: "{form.category}"<br/>
-        Available Categories: {categories.join(", ")}<br/>
-        Selected Station: {selected?.name || "None"}<br/>
-        Selected Post ID: {selectedPost?.id || "None"}<br/>
-        Original Post Category Relation: {selectedPost?.category?.name || "None"}<br/>
-        Original Post CategoryId: {selectedPost?.categoryId || "None"}
-      </div>
-
       {/* Station Selection */}
       <div>
         <Label>Station</Label>
@@ -343,16 +355,16 @@ function PostForm() {
       {/* Action Buttons */}
       <div className="flex justify-between items-center pt-6 border-t">
         <div className="flex gap-2">
-          <Button onClick={handleSave} size="lg">
+          <Button type="button" onClick={handleSave} size="lg">
             {isEditMode ? "Update" : "Create"} Post
           </Button>
-          <Button variant="outline" onClick={closeDialog}>
+          <Button type="button" variant="outline" onClick={closeDialog}>
             Cancel
           </Button>
         </div>
-        
+
         {isEditMode && (
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button type="button" variant="destructive" onClick={handleDelete}>
             Delete Post
           </Button>
         )}

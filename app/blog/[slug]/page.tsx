@@ -7,7 +7,12 @@ import ShareButtons from "@/components/blog/ShareButtons";
 import YouTube from "@/components/blog/YouTube";
 import React from "react";
 import { Metadata } from "next";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
+import type { Post as DbPost, Category as DbCategory } from "@/types/supabase";
+
+type DbPostWithCategory = DbPost & {
+  categories: Pick<DbCategory, 'id' | 'name' | 'slug'> | null;
+};
 
 // --- Types ---
 type Category = {
@@ -25,9 +30,9 @@ type Post = {
   coverImage: string | null;
   published: boolean;
   stationId: string;
-  categoryId: string | null; // Updated to allow null
-  category: Category | null; // Updated to allow null
-  createdAt: Date;
+  categoryId: string | null;
+  category: Category | null;
+  createdAt: string;
 };
 
 // --- SEO with async props ---
@@ -55,24 +60,44 @@ export async function generateMetadata(
 async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
     // Since we don't have stationId in the URL, we'll find the first published post with this slug
-    // You might want to add stationId to your URL structure if you have multiple stations
-    const post = await prisma.post.findFirst({
-      where: {
-        slug,
-        published: true,
-      },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-    });
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        *,
+        categories (
+          id,
+          name,
+          slug
+        )
+      `)
+      .eq("slug", slug)
+      .eq("published", true)
+      .single();
 
-    return post;
+    if (error || !data) {
+      return null;
+    }
+
+    const post = data as DbPostWithCategory;
+
+    // Transform snake_case to camelCase
+    return {
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt,
+      content: post.content,
+      coverImage: post.cover_image,
+      published: post.published,
+      stationId: post.station_id,
+      categoryId: post.category_id,
+      createdAt: post.created_at,
+      category: post.categories ? {
+        id: post.categories.id,
+        name: post.categories.name,
+        slug: post.categories.slug,
+      } : null,
+    };
   } catch (error) {
     console.error("Error fetching post:", error);
     return null;

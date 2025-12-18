@@ -1,9 +1,10 @@
 // app/api/oaps/[id]/route.ts
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { unlink } from "fs/promises";
 import path from "path";
 import type { NextRequest } from "next/server";
+import type { OAP } from "@/types/supabase";
 
 export async function DELETE(
   req: NextRequest,
@@ -16,17 +17,31 @@ export async function DELETE(
       return NextResponse.json({ error: "Missing OAP ID" }, { status: 400 });
     }
 
-    const existingOAP = await prisma.oAP.findUnique({ where: { id } });
+    // Find existing OAP
+    const { data: existingData, error: fetchError } = await supabaseAdmin
+      .from("oaps")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-    if (!existingOAP) {
+    if (fetchError || !existingData) {
       return NextResponse.json({ error: "OAP not found" }, { status: 404 });
     }
 
-    await prisma.oAP.delete({ where: { id } });
+    const existingOAP = existingData as OAP;
 
-    if (existingOAP.photoUrl) {
+    // Delete the OAP
+    const { error: deleteError } = await supabaseAdmin
+      .from("oaps")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) throw deleteError;
+
+    // Try to delete photo file
+    if (existingOAP.photo_url) {
       try {
-        const filename = existingOAP.photoUrl.split("/").pop();
+        const filename = existingOAP.photo_url.split("/").pop();
         if (filename) {
           const filePath = path.join(process.cwd(), "public", "oaps", filename);
           await unlink(filePath);
@@ -37,9 +52,20 @@ export async function DELETE(
       }
     }
 
+    // Transform response to camelCase
+    const deletedOAP = {
+      id: existingOAP.id,
+      name: existingOAP.name,
+      slug: existingOAP.slug,
+      bio: existingOAP.bio,
+      photoUrl: existingOAP.photo_url,
+      shows: existingOAP.shows,
+      stationId: existingOAP.station_id,
+    };
+
     return NextResponse.json({
       message: "OAP deleted successfully",
-      deletedOAP: existingOAP,
+      deletedOAP,
     });
   } catch (err) {
     console.error("Delete OAP error:", err);

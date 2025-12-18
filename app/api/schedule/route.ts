@@ -1,52 +1,49 @@
 // app/api/schedule/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
+import type { Schedule } from "@/types/supabase";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     let stationId = searchParams.get('stationId');
 
-    // If no stationId provided, you can either:
-    // Option A: Use a default stationId
+    // If no stationId provided, use default
     if (!stationId) {
-      stationId = "lounge877"; // Replace with your actual default station ID
+      stationId = "lounge877";
       console.log("No stationId provided, using default:", stationId);
     }
 
-    // Option B: If you prefer to get the first available station when no stationId is provided
-    // Uncomment the code below and comment out the lines above
-    /*
-    if (!stationId) {
-      const firstStation = await prisma.station.findFirst();
-      if (!firstStation) {
-        return NextResponse.json([], { status: 200 }); // Return empty array if no stations exist
-      }
-      stationId = firstStation.id;
-      console.log("No stationId provided, using first available station:", stationId);
-    }
-    */
+    const { data: scheduleSlots, error } = await supabase
+      .from("schedules")
+      .select("*")
+      .eq("station_id", stationId)
+      .order("weekday", { ascending: true })
+      .order("start_time", { ascending: true });
 
-    // Fetch ALL schedule slots for this station
-    const scheduleSlots = await prisma.schedule.findMany({
-      where: { 
-        stationId: stationId 
-      },
-      orderBy: [
-        { weekday: 'asc' },
-        { startTime: 'asc' }
-      ]
-    });
+    if (error) throw error;
 
-    console.log(`Found ${scheduleSlots.length} schedule slots for station ${stationId}`);
-    
-    // Return the schedule slots directly as an array
-    return NextResponse.json(scheduleSlots);
+    console.log(`Found ${scheduleSlots?.length || 0} schedule slots for station ${stationId}`);
+
+    // Transform snake_case to camelCase for API response
+    const transformedSlots = ((scheduleSlots || []) as Schedule[]).map((s) => ({
+      id: s.id,
+      showTitle: s.show_title,
+      slug: s.slug,
+      startTime: s.start_time,
+      endTime: s.end_time,
+      description: s.description,
+      thumbnailUrl: s.thumbnail_url,
+      weekday: s.weekday,
+      stationId: s.station_id,
+    }));
+
+    return NextResponse.json(transformedSlots);
 
   } catch (error) {
     console.error("Schedule fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch schedule" }, 
+      { error: "Failed to fetch schedule" },
       { status: 500 }
     );
   }

@@ -1,6 +1,6 @@
 // app/api/blog/delete/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { requireAuth } from "@/lib/apiAuth";
 
 export async function POST(req: NextRequest) {
@@ -13,12 +13,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await prisma.post.deleteMany({
-      where: {
-        stationId,
-        slug
-      }
-    });
+    const { error } = await supabaseAdmin
+      .from("posts")
+      .delete()
+      .eq("station_id", stationId)
+      .eq("slug", slug);
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
   } catch (err) {

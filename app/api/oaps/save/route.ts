@@ -1,7 +1,8 @@
 // app/api/oaps/save/route.ts
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabaseAdmin, generateId } from "@/lib/supabase";
 import { requireAuth } from "@/lib/apiAuth";
+import type { OAP } from "@/types/supabase";
 
 // Utility to generate a slug
 function slugify(text: string): string {
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
 
     for (const oap of oaps) {
       const { id, name, bio, photoUrl, shows } = oap;
-      
+
       // Skip OAPs that don't have at least a name
       if (!name?.trim()) {
         skippedOAPs.push({ id, reason: "Missing name" });
@@ -41,24 +42,57 @@ export async function POST(req: Request) {
       const data = {
         name: name.trim(),
         bio: bio?.trim() || "",
-        photoUrl: photoUrl?.trim() || "",
+        photo_url: photoUrl?.trim() || "",
         slug,
-        stationId,
+        station_id: stationId,
         shows: Array.isArray(shows) ? shows : [],
       };
 
       try {
         if (id && id.startsWith("new-")) {
           // New OAP - create
-          const created = await prisma.oAP.create({ data });
-          savedOAPs.push(created);
+          const { data: createdData, error } = await supabaseAdmin
+            .from("oaps")
+            .insert({
+              id: generateId(),
+              ...data,
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          const created = createdData as OAP;
+
+          savedOAPs.push({
+            id: created.id,
+            name: created.name,
+            slug: created.slug,
+            bio: created.bio,
+            photoUrl: created.photo_url,
+            shows: created.shows,
+            stationId: created.station_id,
+          });
         } else if (id) {
           // Existing OAP - update
-          const updated = await prisma.oAP.update({
-            where: { id },
-            data,
+          const { data: updatedData, error } = await supabaseAdmin
+            .from("oaps")
+            .update(data)
+            .eq("id", id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          const updated = updatedData as OAP;
+
+          savedOAPs.push({
+            id: updated.id,
+            name: updated.name,
+            slug: updated.slug,
+            bio: updated.bio,
+            photoUrl: updated.photo_url,
+            shows: updated.shows,
+            stationId: updated.station_id,
           });
-          savedOAPs.push(updated);
         } else {
           skippedOAPs.push({ id, reason: "No valid ID" });
         }
@@ -68,9 +102,9 @@ export async function POST(req: Request) {
       }
     }
 
-    const response: any = { 
+    const response: Record<string, unknown> = {
       oaps: savedOAPs,
-      saved: savedOAPs.length 
+      saved: savedOAPs.length
     };
 
     if (skippedOAPs.length > 0) {

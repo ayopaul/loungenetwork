@@ -1,6 +1,6 @@
 // app/api/stations/save/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 import { requireAuth } from "@/lib/apiAuth";
 
 export async function POST(req: NextRequest) {
@@ -14,18 +14,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    await prisma.station.upsert({
-      where: { id: newStation.id },
-      update: {
-        name: newStation.name,
-        streamUrl: newStation.streamUrl
-      },
-      create: {
+    const { error } = await supabaseAdmin
+      .from("stations")
+      .upsert({
         id: newStation.id,
         name: newStation.name,
-        streamUrl: newStation.streamUrl
-      }
-    });
+        stream_url: newStation.streamUrl,
+      }, { onConflict: "id" });
+
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
   } catch (err) {

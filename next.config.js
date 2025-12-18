@@ -4,8 +4,6 @@ const nextConfig = {
   reactStrictMode: true,
   staticPageGenerationTimeout: 120,
 
-  serverExternalPackages: ['@prisma/client'],
-
   images: {
     remotePatterns: [
       {
