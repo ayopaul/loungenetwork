@@ -13,6 +13,12 @@ type Props = PropsWithChildren<NextThemesProviderProps>;
 export function ThemeProvider({ children, ...props }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
+
+  // Return children with suppressHydrationWarning to avoid hydration mismatch
+  // while still rendering content during SSR
+  if (!mounted) {
+    return <div suppressHydrationWarning>{children}</div>;
+  }
+
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }

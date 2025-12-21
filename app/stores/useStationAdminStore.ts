@@ -53,5 +53,5 @@ export function useHydrateStation() {
         if (parsed?.id && parsed?.name) openDialog(parsed);
       } catch {}
     }
-  }, []);
+  }, [openDialog]);
 }

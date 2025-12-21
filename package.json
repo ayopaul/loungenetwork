@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "next build",
-        "postbuild": "mkdir -p .next/standalone/public/uploads .next/standalone/public/oaps && cp -r public/uploads/. .next/standalone/public/uploads/ 2>/dev/null || true && cp -r public/oaps/. .next/standalone/public/oaps/ 2>/dev/null || true",
+        "postbuild": "mkdir -p .next/standalone/public && cp -r public/. .next/standalone/public/ && cp -r .next/static .next/standalone/.next/",
         "start": "node .next/standalone/server.js",
         "lint": "next lint",
         "test:supabase": "npx tsx scripts/tests/test-supabase-connection.ts",
