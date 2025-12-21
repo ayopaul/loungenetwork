@@ -36,19 +36,7 @@ interface ScheduleEditorProps {
 }
 
 // Placeholder for your actual image upload API endpoint
-const IMAGE_UPLOAD_API_ENDPOINT = "/api/upload/thumbnail"; // Replace with your actual endpoint
-
-// Debounce utility function
-function debounce<T extends (...args: any[]) => void>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
+const IMAGE_UPLOAD_API_ENDPOINT = "/api/upload/thumbnail";
 
 export default function ScheduleEditor({ station }: ScheduleEditorProps) {
   const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
@@ -96,28 +84,18 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
     }
   }, [activeDay]); // Dependency array ensures this runs when activeDay changes.
 
-  // Improved updateSlot with debouncing for rapid changes
-  const updateSlotDebounced = useCallback(
-    debounce((id: string, field: keyof ScheduleSlot, value: string | number) => {
-      setSchedule((prev) => {
-        const existingSlot = prev.find(slot => slot.id === id);
-        if (!existingSlot) {
-          console.warn(`Slot with id ${id} not found`);
-          return prev;
-        }
-        
-        return prev.map((slot) =>
-          slot.id === id ? { ...slot, [field]: value } : slot
-        );
-      });
-    }, 300),
-    []
-  );
-
-  // Function to update a specific field of a schedule slot.
-  const updateSlot = (id: string, field: keyof ScheduleSlot, value: string | number) => {
-    updateSlotDebounced(id, field, value);
-  };
+  // Function to update a specific field of a schedule slot - immediate update for responsive UI
+  const updateSlot = useCallback((id: string, field: keyof ScheduleSlot, value: string | number) => {
+    setSchedule((prev) => {
+      const existingSlot = prev.find(slot => slot.id === id);
+      if (!existingSlot) {
+        return prev;
+      }
+      return prev.map((slot) =>
+        slot.id === id ? { ...slot, [field]: value } : slot
+      );
+    });
+  }, []);
 
   // Improved handleAddSlot with better ID generation
   const handleAddSlot = () => {

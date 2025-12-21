@@ -121,4 +121,4 @@ RETURNS TEXT AS $$
 BEGIN
   RETURN concat('c', to_hex(extract(epoch from now())::bigint), substr(md5(random()::text), 1, 12));
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = '';

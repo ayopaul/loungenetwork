@@ -53,8 +53,6 @@ export default function BlogManager({ station }: BlogManagerProps) {
     fetch(`/api/blog?stationId=${station.id}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("🔍 DEBUG - Blog API Response:", data);
-        
         // Handle both new format { posts: [...] } and old format [...]
         let postsArray: BlogPost[] = [];
         
@@ -67,9 +65,7 @@ export default function BlogManager({ station }: BlogManagerProps) {
             postsArray = data;
           }
         }
-        
-        console.log("🔍 DEBUG - Processed posts array:", postsArray);
-        
+
         // Ensure we have a valid array
         if (Array.isArray(postsArray)) {
           const sorted = [...postsArray].sort((a, b) => {

@@ -35,3 +35,6 @@ loungenetwork.git/
 loungenetwork.git.bfg-report/
 
 /generated/prisma
+
+# Admin setup script (contains sensitive operations)
+scripts/setup-admin-user.ts

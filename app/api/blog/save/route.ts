@@ -23,16 +23,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing stationId or slug" }, { status: 400 });
     }
 
-    console.log("Saving post with category:", post.category);
-
     // --- Ensure categoryId is always set ---
     let categoryId: string;
 
     if (post.category && (post.category as string).trim()) {
       const categoryName = post.category as string;
       const slug = categoryName.toLowerCase().replace(/\s+/g, "-");
-
-      console.log("Looking for category with slug:", slug, "and stationId:", stationId);
 
       // Try to find existing category by name and stationId
       const { data: existingCategory, error: findError } = await supabaseAdmin
@@ -44,7 +40,6 @@ export async function POST(req: NextRequest) {
 
       if (existingCategory && !findError) {
         categoryId = (existingCategory as Category).id;
-        console.log("Found existing category:", (existingCategory as Category).id, (existingCategory as Category).name);
       } else {
         // Create new category with unique ID
         const newCategoryId = `${slug}-${Date.now()}`;
@@ -62,7 +57,6 @@ export async function POST(req: NextRequest) {
 
         if (createError) throw createError;
         categoryId = (created as Category).id;
-        console.log("Created new category:", (created as Category).id, (created as Category).name);
       }
     } else {
       // Fallback to "Uncategorized"
@@ -95,10 +89,7 @@ export async function POST(req: NextRequest) {
         if (createError) throw createError;
         categoryId = (created as Category).id;
       }
-      console.log("Using fallback category:", categoryId);
     }
-
-    console.log("Final categoryId for post:", categoryId);
 
     // --- Save post via upsert ---
     const postData = {
@@ -160,8 +151,6 @@ export async function POST(req: NextRequest) {
       if (error) throw error;
       savedPost = data as PostWithCategory;
     }
-
-    console.log("Saved post with category relation:", savedPost.categories);
 
     // --- Fetch categories after save ---
     const { data: categories } = await supabaseAdmin

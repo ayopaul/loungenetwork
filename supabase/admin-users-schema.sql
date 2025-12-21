@@ -48,6 +48,10 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip_address);
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for re-running this script)
+DROP POLICY IF EXISTS "Service role only on admin_users" ON admin_users;
+DROP POLICY IF EXISTS "Service role only on login_attempts" ON login_attempts;
+
 -- Only service role can access admin_users (no public access)
 CREATE POLICY "Service role only on admin_users" ON admin_users
   FOR ALL USING (auth.role() = 'service_role');
@@ -64,7 +68,7 @@ DECLARE
   lock_time TIMESTAMPTZ;
 BEGIN
   SELECT locked_until INTO lock_time
-  FROM admin_users
+  FROM public.admin_users
   WHERE username = user_username;
 
   IF lock_time IS NULL THEN
@@ -73,7 +77,7 @@ BEGIN
 
   RETURN lock_time > NOW();
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- ============================================
 -- HELPER FUNCTION: Record failed login attempt
@@ -87,7 +91,7 @@ DECLARE
 BEGIN
   -- Get current failed attempts
   SELECT failed_login_attempts INTO current_attempts
-  FROM admin_users
+  FROM public.admin_users
   WHERE username = user_username;
 
   IF current_attempts IS NULL THEN
@@ -99,21 +103,21 @@ BEGIN
   -- Update the user record
   IF current_attempts >= max_attempts THEN
     -- Lock the account
-    UPDATE admin_users
+    UPDATE public.admin_users
     SET failed_login_attempts = current_attempts,
         last_failed_login = NOW(),
         locked_until = NOW() + lockout_duration,
         updated_at = NOW()
     WHERE username = user_username;
   ELSE
-    UPDATE admin_users
+    UPDATE public.admin_users
     SET failed_login_attempts = current_attempts,
         last_failed_login = NOW(),
         updated_at = NOW()
     WHERE username = user_username;
   END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- ============================================
 -- HELPER FUNCTION: Record successful login
@@ -121,7 +125,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 CREATE OR REPLACE FUNCTION record_successful_login(user_username TEXT)
 RETURNS void AS $$
 BEGIN
-  UPDATE admin_users
+  UPDATE public.admin_users
   SET failed_login_attempts = 0,
       locked_until = NULL,
       last_failed_login = NULL,
@@ -129,7 +133,7 @@ BEGIN
       updated_at = NOW()
   WHERE username = user_username;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- ============================================
 -- INSERT DEFAULT ADMIN USER

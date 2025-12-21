@@ -45,7 +45,6 @@ export async function DELETE(
         if (filename) {
           const filePath = path.join(process.cwd(), "public", "oaps", filename);
           await unlink(filePath);
-          console.log(`Deleted photo file: ${filePath}`);
         }
       } catch (fileError) {
         console.warn("Could not delete photo file:", fileError);

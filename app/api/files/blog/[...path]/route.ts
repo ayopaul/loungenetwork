@@ -21,21 +21,17 @@ export async function GET(
 
     // Reconstruct the file path from segments
     const filePath = path.join(UPLOAD_DIR, ...pathSegments);
-    
-    console.log('Serving file:', filePath);
 
     // Security check: make sure the path is within the upload directory
     const normalizedPath = path.normalize(filePath);
     const normalizedUploadDir = path.normalize(UPLOAD_DIR);
-    
+
     if (!normalizedPath.startsWith(normalizedUploadDir)) {
-      console.log('Security violation: path traversal attempt');
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     // Check if file exists
     if (!existsSync(filePath)) {
-      console.log('File not found:', filePath);
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
 
@@ -53,12 +49,6 @@ export async function GET(
       // Get the file extension and determine MIME type
       const fileExtension = path.extname(filePath);
       const mimeType = lookup(fileExtension) || 'application/octet-stream';
-      
-      console.log('File served successfully:', { 
-        path: filePath, 
-        size: stats.size, 
-        mimeType 
-      });
 
       // Return the file with appropriate headers
       return new NextResponse(fileBuffer, {

@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
     // If no stationId provided, use default
     if (!stationId) {
       stationId = "lounge877";
-      console.log("No stationId provided, using default:", stationId);
     }
 
     const { data: scheduleSlots, error } = await supabase
@@ -22,8 +21,6 @@ export async function GET(req: NextRequest) {
       .order("start_time", { ascending: true });
 
     if (error) throw error;
-
-    console.log(`Found ${scheduleSlots?.length || 0} schedule slots for station ${stationId}`);
 
     // Transform snake_case to camelCase for API response
     const transformedSlots = ((scheduleSlots || []) as Schedule[]).map((s) => ({

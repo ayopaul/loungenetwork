@@ -34,6 +34,7 @@ function PostForm() {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [categoryManuallyChanged, setCategoryManuallyChanged] = useState(false);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
@@ -64,8 +65,6 @@ function PostForm() {
 
   useEffect(() => {
     if (isEditMode && selectedPost) {
-      console.log("🔍 DEBUG - Selected post for editing:", selectedPost);
-      
       // Fix: Ensure the station is set from the post
       if (selectedPost.stationId && (!selected || selected.id !== selectedPost.stationId)) {
         const match = stations.find((s) => s.id === selectedPost.stationId);
@@ -76,10 +75,7 @@ function PostForm() {
       let categoryValue = "";
       if (selectedPost.category && selectedPost.category.name) {
         categoryValue = selectedPost.category.name;
-        console.log("🔍 DEBUG - Using category relation name:", categoryValue);
       }
-      
-      console.log("🔍 DEBUG - Final category value:", categoryValue);
       
       // Populate form with all available fields from selectedPost
       setForm({
@@ -93,12 +89,13 @@ function PostForm() {
         published: selectedPost.published || false,
       });
       
-      // Reset the manual change flag when loading a new post
+      // Reset the manual change flags when loading a new post
       setCategoryManuallyChanged(false);
-      
+      setSlugManuallyEdited(true); // Slug exists, mark as edited
+
     } else {
-      console.log("🔍 DEBUG - Creating new post");
       setCategoryManuallyChanged(false);
+      setSlugManuallyEdited(false); // New post, allow auto-generation
       setForm({
         id: crypto.randomUUID(),
         title: "",
@@ -112,15 +109,41 @@ function PostForm() {
     }
   }, [isEditMode, selectedPost?.id]);
 
+  // Helper to generate slug from title
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-'); // Remove consecutive hyphens
+  };
+
   // Use useCallback to prevent unnecessary re-renders
   const handleChange = useCallback((field: string, value: string | boolean) => {
-    console.log(`🔍 DEBUG - Changing ${field} to:`, value);
     setForm((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Special handler for title that auto-generates slug
+  const handleTitleChange = useCallback((title: string) => {
+    setForm((prev) => {
+      const updates: Partial<typeof prev> = { title };
+      // Auto-generate slug only if it hasn't been manually edited
+      if (!slugManuallyEdited) {
+        updates.slug = generateSlug(title);
+      }
+      return { ...prev, ...updates };
+    });
+  }, [slugManuallyEdited]);
+
+  // Handler for slug that marks it as manually edited
+  const handleSlugChange = useCallback((slug: string) => {
+    setSlugManuallyEdited(true);
+    setForm((prev) => ({ ...prev, slug }));
   }, []);
 
   // Separate handler for category selection to prevent station reset
   const handleCategorySelect = useCallback((categoryValue: string) => {
-    console.log(`🔍 DEBUG - Category selected:`, categoryValue);
     setForm((prev) => ({ ...prev, category: categoryValue }));
     setCategoryManuallyChanged(true);
     setOpen(false);
@@ -132,13 +155,14 @@ function PostForm() {
       toast.error("Select a station");
       return;
     }
+    if (!form.slug?.trim()) {
+      toast.error("Please enter a slug for the post URL.");
+      return;
+    }
     if (!form.category?.trim()) {
       toast.error("Please select or enter a category.");
       return;
     }
-
-    console.log("🔍 DEBUG - Saving post with data:", form);
-    console.log("🔍 DEBUG - Category being saved:", form.category);
 
     try {
       const res = await fetch("/api/blog/save", {
@@ -245,19 +269,22 @@ function PostForm() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label>Title</Label>
-          <Input 
-            value={form.title} 
-            onChange={(e) => handleChange("title", e.target.value)}
+          <Input
+            value={form.title}
+            onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Enter post title"
           />
         </div>
-        <div> 
+        <div>
           <Label>Slug</Label>
-          <Input 
-            value={form.slug} 
-            onChange={(e) => handleChange("slug", e.target.value)}
+          <Input
+            value={form.slug}
+            onChange={(e) => handleSlugChange(e.target.value)}
             placeholder="post-url-slug"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Auto-generated from title. Edit to customize.
+          </p>
         </div>
       </div>
 
