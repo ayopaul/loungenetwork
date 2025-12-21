@@ -17,11 +17,19 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch posts with category join
+    // Fetch posts with category join (exclude content for list view - it's large)
     const { data: posts, error } = await supabase
       .from("posts")
       .select(`
-        *,
+        id,
+        title,
+        slug,
+        excerpt,
+        cover_image,
+        published,
+        station_id,
+        category_id,
+        created_at,
         categories (
           id,
           name,
@@ -39,7 +47,6 @@ export async function GET(req: NextRequest) {
       title: post.title,
       slug: post.slug,
       excerpt: post.excerpt,
-      content: post.content,
       coverImage: post.cover_image,
       published: post.published,
       stationId: post.station_id,
