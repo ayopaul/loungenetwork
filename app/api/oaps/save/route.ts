@@ -97,7 +97,7 @@ export async function POST(req: Request) {
           skippedOAPs.push({ id, reason: "No valid ID" });
         }
       } catch (dbError) {
-        console.error(`Database error for OAP ${id}:`, dbError);
+        console.error("Database error for OAP:", id, dbError);
         skippedOAPs.push({ id, reason: "Database error", error: dbError });
       }
     }
