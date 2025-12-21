@@ -17,6 +17,17 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useStationStore } from "@/stores/useStationStore";
 import { useBlogStore } from "../../stores/useBlogStore";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,6 +46,7 @@ function PostForm() {
   const [open, setOpen] = useState(false);
   const [categoryManuallyChanged, setCategoryManuallyChanged] = useState(false);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [form, setForm] = useState({
     id: "",
@@ -213,11 +225,7 @@ function PostForm() {
       return;
     }
 
-    // Confirm before deleting
-    if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) {
-      return;
-    }
-
+    setIsDeleting(true);
     try {
       const res = await fetch(`/api/blog/delete`, {
         method: "POST",
@@ -237,6 +245,8 @@ function PostForm() {
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Network error while deleting post");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -380,7 +390,8 @@ function PostForm() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-between items-center pt-6 border-t">
+      <div className="flex flex-col gap-4 pt-6 border-t">
+        {/* Primary actions */}
         <div className="flex gap-2">
           <Button type="button" onClick={handleSave} size="lg">
             {isEditMode ? "Update" : "Create"} Post
@@ -390,10 +401,41 @@ function PostForm() {
           </Button>
         </div>
 
+        {/* Delete - separated and with confirmation dialog */}
         {isEditMode && (
-          <Button type="button" variant="destructive" onClick={handleDelete}>
-            Delete Post
-          </Button>
+          <div className="pt-4 border-t">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete this post"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Post</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete &quot;{form.title || "this post"}&quot;?
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         )}
       </div>
     </div>

@@ -6,6 +6,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -22,6 +23,11 @@ export default function PostDialog() {
           <DialogTitle>
             {isEditMode ? "Edit Blog Post" : "Create New Post"}
           </DialogTitle>
+          <DialogDescription>
+            {isEditMode
+              ? "Update the details of your blog post below."
+              : "Fill in the details to create a new blog post."}
+          </DialogDescription>
         </DialogHeader>
         <PostForm />
       </DialogContent>

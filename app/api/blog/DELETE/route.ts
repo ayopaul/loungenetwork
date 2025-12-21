@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireAuth } from "@/lib/apiAuth";
 
-export async function POST(req: NextRequest) {
+async function handleDelete(req: NextRequest) {
   const auth = await requireAuth();
   if (!auth.authorized) return auth.response;
 
@@ -26,4 +26,13 @@ export async function POST(req: NextRequest) {
     console.error("Blog delete error:", err);
     return NextResponse.json({ error: "Failed to delete post" }, { status: 500 });
   }
+}
+
+// Support both POST and DELETE methods
+export async function POST(req: NextRequest) {
+  return handleDelete(req);
+}
+
+export async function DELETE(req: NextRequest) {
+  return handleDelete(req);
 }
