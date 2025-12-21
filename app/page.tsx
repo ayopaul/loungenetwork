@@ -1,9 +1,9 @@
 // app/page.tsx
 'use client';
 
-import { AuroraBackground } from "@/components/ui/AuroraBackground"; 
+import { AuroraBackground } from "@/components/ui/AuroraBackground";
 import { motion } from "motion/react";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -13,18 +13,9 @@ import { useStationStore } from "@/stores/useStationStore";
 import BlogByCategory from "@/components/blog/BlogByCategory";
 import stations from "@/data/stations.json";
 
-
-export default function HomePage() {
+function HighlightHandler() {
   const searchParams = useSearchParams()
   const highlightSlug = searchParams?.get("highlight")
-
-  const { selected, setSelected } = useStationStore();
-
-  useEffect(() => {
-    if (!selected && stations.length > 0) {
-      setSelected(stations[0]);
-    }
-  }, [selected]);
 
   useEffect(() => {
     if (highlightSlug) {
@@ -32,9 +23,24 @@ export default function HomePage() {
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
     }
   }, [highlightSlug])
+
+  return null
+}
+
+export default function HomePage() {
+  const { selected, setSelected } = useStationStore();
+
+  useEffect(() => {
+    if (!selected && stations.length > 0) {
+      setSelected(stations[0]);
+    }
+  }, [selected, setSelected]);
   
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Suspense fallback={null}>
+        <HighlightHandler />
+      </Suspense>
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-10">
