@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useCurrentShow } from "@/hooks/useCurrentShow";
 import { useStationStore } from "@/stores/useStationStore";
 import { useGlobalAudio } from "@/stores/useGlobalAudio";
@@ -31,10 +32,13 @@ export default function LivePlayer() {
 
       <CardContent className="flex items-center gap-4">
         <div className="relative w-[30vw] max-w-[96px] aspect-square rounded-lg overflow-hidden">
-          <img
+          <Image
             src={show.thumbnailUrl}
             alt={show.showTitle}
-            className="w-full h-full object-cover"
+            fill
+            sizes="96px"
+            className="object-cover"
+            unoptimized
           />
           <button
             onClick={togglePlayback}

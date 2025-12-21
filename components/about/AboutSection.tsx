@@ -2,6 +2,7 @@
 
 'use client';
 
+import Image from "next/image";
 import { useStationStore } from "@/stores/useStationStore";
 
 export default function AboutSection() {
@@ -74,7 +75,9 @@ export default function AboutSection() {
 
       <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
         <div className="bg-background dark:bg-neutral-800 rounded-xl overflow-hidden shadow-md">
-          <img src={content.image1} alt="Studio" className="w-full h-48 object-cover" />
+          <div className="relative w-full h-48">
+            <Image src={content.image1} alt="Studio" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          </div>
           <div className="p-6 bg-background">
             <h3 className="text-xl font-semibold mb-2 text-foreground">{content.card1Title}</h3>
             <p className="text-foreground">{content.card1Text}</p>
@@ -82,7 +85,9 @@ export default function AboutSection() {
         </div>
 
         <div className="bg-background dark:bg-neutral-800 rounded-xl overflow-hidden shadow-md">
-          <img src={content.image2} alt="Community" className="w-full h-48 object-cover" />
+          <div className="relative w-full h-48">
+            <Image src={content.image2} alt="Community" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+          </div>
           <div className="p-6 bg-background">
             <h3 className="text-xl font-semibold mb-2 text-foreground">{content.card2Title}</h3>
             <p className="text-foreground">{content.card2Text}</p>

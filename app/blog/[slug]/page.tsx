@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -153,11 +154,17 @@ export default async function BlogPostPage(
           <h1 className="text-4xl font-bold mb-3">{post.title}</h1>
 
           {post.coverImage && (
-            <img
-              src={post.coverImage}
-              alt={post.title}
-              className="w-full rounded-xl mb-6 object-cover max-h-[400px]"
-            />
+            <div className="relative w-full h-[400px] mb-6">
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="rounded-xl object-cover"
+                priority
+                unoptimized
+              />
+            </div>
           )}
 
           <div className="prose prose-neutral dark:prose-invert max-w-none">

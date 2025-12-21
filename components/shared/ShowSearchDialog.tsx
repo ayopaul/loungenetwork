@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import {
   Dialog,
   DialogTrigger,
@@ -118,11 +119,16 @@ export default function ShowSearchDialog({ shows }: { shows: Show[] }) {
               onClick={() => handleSelect(show)}
               className="flex gap-4 items-center w-full text-left p-2 rounded-md hover:bg-muted transition"
             >
-              <img
-                src={show.thumbnailUrl}
-                alt={show.showTitle}
-                className="w-12 h-12 rounded-md object-cover"
-              />
+              <div className="relative w-12 h-12 rounded-md overflow-hidden shrink-0">
+                <Image
+                  src={show.thumbnailUrl}
+                  alt={show.showTitle}
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
 
               <div className="flex-1">
                 <p className="font-semibold">{show.showTitle}</p>

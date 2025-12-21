@@ -2,10 +2,12 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useShowStore, ScheduleSlot } from "@/stores/useShowStore";
+import { slugify } from "@/lib/slugify";
 import ShowDialog from "./ShowDialog";
 
 const weekdays = [
@@ -75,15 +77,6 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
 
   // Save handler called from ShowForm via ShowDialog
   const handleSaveShow = useCallback(async (slot: ScheduleSlot, isNew: boolean) => {
-    function slugify(text: string): string {
-      return text
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]+/g, "")
-        .replace(/--+/g, "-");
-    }
-
     const safeTitle = slot.showTitle?.trim() || "Untitled Show";
     const safeStartTime = slot.startTime?.trim() || "00:00";
     const safeSlug = `${slugify(safeTitle)}-${safeStartTime.replace(":", "")}`;
@@ -226,14 +219,16 @@ export default function ScheduleEditor({ station }: ScheduleEditorProps) {
                   >
                     <div className="flex items-start gap-4">
                       {/* Thumbnail */}
-                      <img
-                        src={slot.thumbnailUrl || "/placeholder-image.svg"}
-                        alt={slot.showTitle}
-                        className="w-20 h-20 object-cover rounded border bg-muted flex-shrink-0"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/placeholder-image.svg";
-                        }}
-                      />
+                      <div className="relative w-20 h-20 rounded border bg-muted flex-shrink-0 overflow-hidden">
+                        <Image
+                          src={slot.thumbnailUrl || "/placeholder-image.svg"}
+                          alt={slot.showTitle}
+                          fill
+                          sizes="80px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
 
                       {/* Show Details */}
                       <div className="flex-1 min-w-0">

@@ -1,6 +1,7 @@
 // components/schedule/ScheduleCard.tsx
 "use client";
 
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -30,10 +31,13 @@ export default function ScheduleCard({
       >
         {/* Thumbnail */}
         <div className="relative aspect-square w-full">
-          <img
+          <Image
             src={thumbnailUrl}
             alt={title}
-            className="object-cover w-full h-full"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+            className="object-cover"
+            unoptimized
           />
           {isLive && (
             <div className="absolute top-2 left-2">

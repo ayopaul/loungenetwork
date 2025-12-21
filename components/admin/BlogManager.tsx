@@ -1,9 +1,10 @@
 //components/admin/BlogManager.tsx
-// this is used to control the listing of blog posts on the admin page 
+// this is used to control the listing of blog posts on the admin page
 
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useBlogStore } from "@/stores/useBlogStore";
 import PostDialog from "./PostDialog";
@@ -160,11 +161,16 @@ export default function BlogManager({ station }: BlogManagerProps) {
                   className="p-4 border rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/70 transition flex items-start gap-4"
                 >
                   {post.coverImage && (
-                    <img
-                      src={post.coverImage}
-                      alt={post.title}
-                      className="w-16 h-16 rounded object-cover border"
-                    />
+                    <div className="relative w-16 h-16 rounded border overflow-hidden shrink-0">
+                      <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
                   )}
                   <div className="flex-1">
                     <div className="flex justify-between items-center">

@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE INDEX IF NOT EXISTS idx_posts_station ON posts(station_id);
 CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category_id);
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
+-- Composite index for common query pattern: station + published status
+CREATE INDEX IF NOT EXISTS idx_posts_station_published ON posts(station_id, published);
 
 -- ============================================
 -- OAPS TABLE (On-Air Personalities)
@@ -85,6 +87,8 @@ CREATE TABLE IF NOT EXISTS schedules (
 
 CREATE INDEX IF NOT EXISTS idx_schedules_station ON schedules(station_id);
 CREATE INDEX IF NOT EXISTS idx_schedules_weekday ON schedules(weekday);
+-- Composite index for common query pattern: station + weekday
+CREATE INDEX IF NOT EXISTS idx_schedules_station_weekday ON schedules(station_id, weekday);
 
 -- ============================================
 -- ROW LEVEL SECURITY (RLS) POLICIES

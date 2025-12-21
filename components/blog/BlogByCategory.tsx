@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useStationStore } from "@/stores/useStationStore";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -85,11 +86,16 @@ export default function BlogByCategory({ limit = 4 }: { limit?: number }) {
                 className="flex flex-col h-full p-4 bg-muted hover:bg-muted/70 transition"
               >
                 {post.coverImage && (
-                  <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-36 object-cover rounded mb-3"
-                  />
+                  <div className="relative w-full h-36 mb-3">
+                    <Image
+                      src={post.coverImage}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                      className="object-cover rounded"
+                      unoptimized
+                    />
+                  </div>
                 )}
                 <div className="flex-1">
                   <h4 className="font-semibold text-base line-clamp-1">{post.title}</h4>

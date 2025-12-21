@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import NextImage from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MultiSelectCombobox } from "@/components/shared/MultiSelectCombobox";
@@ -267,15 +268,16 @@ export default function OAPManager({ station }: { station: Station }) {
                   Uploading...
                 </div>
               ) : oap.photoUrl ? (
-                <img
-                  src={oap.photoUrl}
-                  alt={oap.name || "OAP photo"}
-                  className="w-16 h-16 rounded-full object-cover"
-                  onError={(e) => {
-                    console.error("Image failed to load:", oap.photoUrl);
-                    handleUpdate(index, "photoUrl", "");
-                  }}
-                />
+                <div className="relative w-16 h-16 rounded-full overflow-hidden">
+                  <NextImage
+                    src={oap.photoUrl}
+                    alt={oap.name || "OAP photo"}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               ) : (
                 <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xs text-muted-foreground">
                   Upload image

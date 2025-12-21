@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef, ChangeEvent } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -276,14 +277,16 @@ export default function ShowForm({ station, onSave, onDelete }: ShowFormProps) {
       <div>
         <Label>Show Thumbnail</Label>
         <div className="mt-2 flex flex-col sm:flex-row items-start gap-4">
-          <img
-            src={form.thumbnailUrl || "/placeholder-image.svg"}
-            alt="Thumbnail preview"
-            className="w-32 h-32 object-cover rounded border bg-muted"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "/placeholder-image.svg";
-            }}
-          />
+          <div className="relative w-32 h-32 rounded border bg-muted overflow-hidden">
+            <Image
+              src={form.thumbnailUrl || "/placeholder-image.svg"}
+              alt="Thumbnail preview"
+              fill
+              sizes="128px"
+              className="object-cover"
+              unoptimized
+            />
+          </div>
           <div className="flex flex-col gap-2">
             <input
               type="file"

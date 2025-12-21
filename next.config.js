@@ -11,7 +11,14 @@ const nextConfig = {
         hostname: 'loungenetwork.ng',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
+      },
     ],
+    // Allow dynamic images from API routes
+    unoptimized: false,
   },
 
   // Security headers

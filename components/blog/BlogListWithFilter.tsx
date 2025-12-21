@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox"; // or your custom-combo setup
@@ -47,11 +48,16 @@ export default function BlogListWithFilter({
             className="border rounded-lg overflow-hidden hover:bg-muted transition"
           >
             {post.coverImage && (
-              <img
-                src={post.coverImage}
-                alt={post.title}
-                className="w-full h-40 object-cover"
-              />
+              <div className="relative w-full h-40">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             )}
             <div className="p-4">
               <p className="text-sm text-primary underline underline-offset-2 mb-1">

@@ -95,7 +95,7 @@ function PostForm() {
         title: selectedPost.title || "",
         slug: selectedPost.slug || "",
         category: categoryValue,
-        coverImage: selectedPost.coverImage || selectedPost.cover_image || "",
+        coverImage: selectedPost.coverImage || "",
         excerpt: selectedPost.excerpt || "",
         content: selectedPost.content || "",
         published: selectedPost.published || false,

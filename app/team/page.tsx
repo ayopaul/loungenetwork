@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useStationStore } from "@/stores/useStationStore";
@@ -106,8 +107,8 @@ export default function TeamPage() {
                   onClick={() => setSelectedOAP(oap)}
                   className="flex flex-col items-center bg-muted/50 dark:bg-muted/40 rounded-xl p-6 text-center cursor-pointer transition hover:scale-105 hover:shadow-md"
                 >
-                  <div className="w-24 h-24 mb-4 overflow-hidden rounded-full bg-muted">
-                    <img src={oap.photoUrl} alt={oap.name} className="object-cover w-full h-full" />
+                  <div className="relative w-24 h-24 mb-4 overflow-hidden rounded-full bg-muted">
+                    <Image src={oap.photoUrl} alt={oap.name} fill sizes="96px" className="object-cover" unoptimized />
                   </div>
                   <h2 className="text-lg font-semibold">{oap.name}</h2>
                   <p className="text-sm text-muted-foreground">{oap.role}</p>
@@ -131,8 +132,8 @@ export default function TeamPage() {
                   {selectedOAP && (
                     <>
                       <div className="flex flex-col items-center space-y-2 mt-4">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-muted">
-                          <img src={selectedOAP.photoUrl} alt={selectedOAP.name} className="object-cover w-full h-full" />
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted">
+                          <Image src={selectedOAP.photoUrl} alt={selectedOAP.name} fill sizes="96px" className="object-cover" unoptimized />
                         </div>
                         <DrawerTitle className="text-2xl">{selectedOAP.name}</DrawerTitle>
                         <DrawerDescription>{selectedOAP.role}</DrawerDescription>
@@ -151,9 +152,9 @@ export default function TeamPage() {
                               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {mapped.map((show) => (
                                   <li key={show.id} className="flex items-center gap-4 rounded-md border p-2 bg-muted/30">
-                                    <div className="w-14 h-14 rounded-md overflow-hidden bg-muted shrink-0">
+                                    <div className="relative w-14 h-14 rounded-md overflow-hidden bg-muted shrink-0">
                                       {show.thumbnailUrl ? (
-                                        <img src={show.thumbnailUrl} alt={show.title} className="object-cover w-full h-full" />
+                                        <Image src={show.thumbnailUrl} alt={show.title} fill sizes="56px" className="object-cover" unoptimized />
                                       ) : (
                                         <span className="flex items-center justify-center w-full h-full text-xs font-semibold text-muted-foreground">No image</span>
                                       )}

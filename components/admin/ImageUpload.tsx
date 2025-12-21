@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef, DragEvent } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -239,11 +240,14 @@ export default function ImageUpload({
       {type === 'cover' && currentCoverImage && (
         <div className="space-y-2">
           <Label className="text-sm font-medium">Current Cover Image</Label>
-          <div className="relative inline-block">
-            <img 
+          <div className="relative w-32 h-32 rounded border overflow-hidden">
+            <Image
               src={currentCoverImage}
               alt="Cover"
-              className="w-32 h-32 object-cover rounded border"
+              fill
+              sizes="128px"
+              className="object-cover"
+              unoptimized
             />
           </div>
         </div>
@@ -258,11 +262,16 @@ export default function ImageUpload({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {uploadedImages.map((image, index) => (
               <div key={index} className="relative group border rounded-lg overflow-hidden">
-                <img
-                  src={image.url}
-                  alt={image.filename}
-                  className="w-full h-24 object-cover"
-                />
+                <div className="relative w-full h-24">
+                  <Image
+                    src={image.url}
+                    alt={image.filename}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
                 
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-1">
                   <Button

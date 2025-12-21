@@ -1,6 +1,7 @@
 // app/blog/page.tsx
 import fs from "fs/promises";
 import path from "path";
+import Image from "next/image";
 import Link from "next/link";
 
 type Post = {
@@ -36,11 +37,16 @@ const publishedPosts = allPosts.filter((post) => post.published);
             className="border rounded-lg overflow-hidden hover:bg-muted transition"
           >
             {post.coverImage && (
-              <img
-                src={post.coverImage}
-                alt={post.title}
-                className="w-full h-40 object-cover"
-              />
+              <div className="relative w-full h-40">
+                <Image
+                  src={post.coverImage}
+                  alt={post.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             )}
             <div className="p-4">
               <p className="text-sm text-muted-foreground uppercase mb-1">{post.category}</p>

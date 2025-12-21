@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import {
@@ -99,8 +100,8 @@ export default function TeamPage() {
                   onClick={() => setSelectedOAP(oap)}
                   className="flex flex-col items-center bg-muted/50 dark:bg-muted/40 rounded-xl p-6 text-center transition hover:scale-105 hover:shadow-md cursor-pointer"
                 >
-                  <div className="w-24 h-24 mb-4 overflow-hidden rounded-full bg-muted">
-                    <img src={oap.photoUrl} alt={oap.name} className="object-cover w-full h-full" />
+                  <div className="relative w-24 h-24 mb-4 overflow-hidden rounded-full bg-muted">
+                    <Image src={oap.photoUrl} alt={oap.name} fill sizes="96px" className="object-cover" unoptimized />
                   </div>
                   <h2 className="text-lg font-semibold">{oap.name}</h2>
                   <p className="text-sm text-muted-foreground">{oap.role}</p>
@@ -151,11 +152,14 @@ export default function TeamPage() {
                   {selectedOAP && (
                     <>
                       <div className="flex flex-col items-center space-y-2 mt-4">
-                        <div className="w-24 h-24 rounded-full overflow-hidden bg-muted">
-                          <img
+                        <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted">
+                          <Image
                             src={selectedOAP.photoUrl}
                             alt={selectedOAP.name}
-                            className="object-cover w-full h-full"
+                            fill
+                            sizes="96px"
+                            className="object-cover"
+                            unoptimized
                           />
                         </div>
                         <DrawerTitle className="text-2xl text-foreground">
@@ -177,12 +181,17 @@ export default function TeamPage() {
                                 key={show.id}
                                 className="flex items-center gap-4 rounded-md border p-2 bg-muted/30"
                               >
-                                <div className="w-12 h-12 rounded-md overflow-hidden bg-muted">
-                                  <img
-                                    src={show.thumbnailUrl}
-                                    alt={show.title}
-                                    className="object-cover w-full h-full"
-                                  />
+                                <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted">
+                                  {show.thumbnailUrl && (
+                                    <Image
+                                      src={show.thumbnailUrl}
+                                      alt={show.title}
+                                      fill
+                                      sizes="48px"
+                                      className="object-cover"
+                                      unoptimized
+                                    />
+                                  )}
                                 </div>
                                 <div className="text-sm font-medium text-foreground">
                                   {show.title}
