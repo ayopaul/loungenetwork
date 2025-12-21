@@ -6,6 +6,7 @@ import path from 'path';
 import { lookup } from 'mime-types';
 
 const UPLOAD_DIR = '/var/uploads/loungenetwork/general';
+const PUBLIC_FALLBACK_DIR = process.cwd() + '/public';
 
 export async function GET(
   request: NextRequest,
@@ -30,24 +31,31 @@ export async function GET(
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Check if file exists
+    // Check if file exists in primary location
+    let actualFilePath = filePath;
     if (!existsSync(filePath)) {
-      return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      // Fallback: check public directory for backward compatibility
+      const publicFallbackPath = path.join(PUBLIC_FALLBACK_DIR, ...pathSegments);
+      if (existsSync(publicFallbackPath)) {
+        actualFilePath = publicFallbackPath;
+      } else {
+        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      }
     }
 
     try {
       // Get file stats
-      const stats = await stat(filePath);
-      
+      const stats = await stat(actualFilePath);
+
       if (!stats.isFile()) {
         return NextResponse.json({ error: 'Not a file' }, { status: 400 });
       }
 
       // Read the file
-      const fileBuffer = await readFile(filePath);
-      
+      const fileBuffer = await readFile(actualFilePath);
+
       // Get the file extension and determine MIME type
-      const fileExtension = path.extname(filePath);
+      const fileExtension = path.extname(actualFilePath);
       const mimeType = lookup(fileExtension) || 'application/octet-stream';
 
       // Return the file with appropriate headers

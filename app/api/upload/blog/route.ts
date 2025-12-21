@@ -46,12 +46,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
     
-    if (!existsSync(stationDir)) {
-      await mkdir(stationDir, { recursive: true });
-    }
-    
-    if (postId && !existsSync(postDir)) {
-      await mkdir(postDir, { recursive: true });
+    try {
+      if (!existsSync(stationDir)) {
+        await mkdir(stationDir, { recursive: true });
+      }
+
+      if (postId && !existsSync(postDir)) {
+        await mkdir(postDir, { recursive: true });
+      }
+    } catch (dirError) {
+      console.error("Failed to create upload directory:", postDir || stationDir, dirError);
+      return NextResponse.json({
+        error: "Server configuration error: Cannot create upload directory",
+        details: dirError instanceof Error ? dirError.message : String(dirError)
+      }, { status: 500 });
     }
 
     // Generate unique filename
@@ -68,7 +76,15 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer and save
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
+    try {
+      await writeFile(filePath, buffer);
+    } catch (writeError) {
+      console.error("Failed to write file:", filePath, writeError);
+      return NextResponse.json({
+        error: "Failed to save file to disk",
+        details: writeError instanceof Error ? writeError.message : String(writeError)
+      }, { status: 500 });
+    }
 
     // Generate the URL path for serving the file
     const urlPath = postId 

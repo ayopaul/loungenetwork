@@ -47,11 +47,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create upload directory if it doesn't exist
-    if (!existsSync(UPLOAD_DIR)) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    }
-
     // Create show-specific directory
     const showDir = path.join(UPLOAD_DIR, showId);
 
@@ -60,8 +55,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
 
-    if (!existsSync(showDir)) {
-      await mkdir(showDir, { recursive: true });
+    try {
+      // Create upload directory if it doesn't exist
+      if (!existsSync(UPLOAD_DIR)) {
+        await mkdir(UPLOAD_DIR, { recursive: true });
+      }
+
+      if (!existsSync(showDir)) {
+        await mkdir(showDir, { recursive: true });
+      }
+    } catch (dirError) {
+      console.error("Failed to create upload directory:", showDir, dirError);
+      return NextResponse.json({
+        error: "Server configuration error: Cannot create upload directory",
+        details: dirError instanceof Error ? dirError.message : String(dirError)
+      }, { status: 500 });
     }
 
     // Generate unique filename
@@ -73,8 +81,16 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer and save
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    await writeFile(filePath, buffer);
+
+    try {
+      await writeFile(filePath, buffer);
+    } catch (writeError) {
+      console.error("Failed to write file:", filePath, writeError);
+      return NextResponse.json({
+        error: "Failed to save file to disk",
+        details: writeError instanceof Error ? writeError.message : String(writeError)
+      }, { status: 500 });
+    }
 
     // Generate the URL that will be used to access this file
     const fileUrl = `/api/files/shows/${showId}/${fileName}`;

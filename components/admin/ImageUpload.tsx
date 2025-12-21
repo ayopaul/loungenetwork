@@ -70,7 +70,13 @@ export default function ImageUpload({
 
   const handleFiles = async (files: FileList) => {
     const file = files[0];
-    
+
+    // Validate station is selected
+    if (!stationId) {
+      toast.error('Please select a station first');
+      return;
+    }
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');

@@ -44,12 +44,28 @@ export async function POST(req: Request) {
     const filepath = path.join(uploadDir, filename);
 
     // Ensure directory exists
-    if (!existsSync(uploadDir)) {
-      mkdirSync(uploadDir, { recursive: true });
+    try {
+      if (!existsSync(uploadDir)) {
+        mkdirSync(uploadDir, { recursive: true });
+      }
+    } catch (dirError) {
+      console.error("Failed to create upload directory:", uploadDir, dirError);
+      return NextResponse.json({
+        error: "Server configuration error: Cannot create upload directory",
+        details: dirError instanceof Error ? dirError.message : String(dirError)
+      }, { status: 500 });
     }
 
     // Save the file
-    await writeFile(filepath, buffer);
+    try {
+      await writeFile(filepath, buffer);
+    } catch (writeError) {
+      console.error("Failed to write file:", filepath, writeError);
+      return NextResponse.json({
+        error: "Failed to save file to disk",
+        details: writeError instanceof Error ? writeError.message : String(writeError)
+      }, { status: 500 });
+    }
 
     // Return URL to be served by API route
     const publicUrl = `/api/files/general/${filename}`;
