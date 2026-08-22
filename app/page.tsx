@@ -51,9 +51,15 @@ export default function HomePage() {
               <div className="absolute inset-0 rounded-2xl bg-gradient-overlay"></div>
               
               {/* Content Layer */}
+              {/* This sits at the very top of the page, always above the
+                  fold, so it must animate in on mount (`animate`) --
+                  `whileInView` waits for its own IntersectionObserver to
+                  fire, which on first paint sometimes never happens until
+                  a scroll event, leaving the hero (heading, socials, and
+                  the live player) stuck invisible at opacity: 0. */}
               <motion.div
                 initial={{ opacity: 0.0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: 0.3,
                   duration: 0.8,
