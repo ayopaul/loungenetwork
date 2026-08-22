@@ -52,13 +52,19 @@ export default function HomePage() {
               
               {/* Content Layer */}
               {/* This sits at the very top of the page, always above the
-                  fold, so it must animate in on mount (`animate`) --
-                  `whileInView` waits for its own IntersectionObserver to
-                  fire, which on first paint sometimes never happens until
-                  a scroll event, leaving the hero (heading, socials, and
-                  the live player) stuck invisible at opacity: 0. */}
+                  fold. It previously used whileInView, which waits for its
+                  own IntersectionObserver to fire -- on a cold production
+                  load that often never happened at all, and even plain
+                  `animate` was observed staying stuck at its `initial`
+                  values (opacity: 0) until some unrelated re-render (e.g.
+                  opening the theme menu) nudged it -- a mount-effect race
+                  that's unreliable regardless of trigger. initial={false}
+                  sidesteps the race entirely: there's no "from" state to
+                  transition out of, so this always paints at its final
+                  values immediately, guaranteeing the heading, socials,
+                  and live player are visible from first paint. */}
               <motion.div
-                initial={{ opacity: 0.0, y: 40 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   delay: 0.3,
