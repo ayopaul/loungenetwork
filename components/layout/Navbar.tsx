@@ -35,6 +35,9 @@ export default function Navbar() {
             <Link href="/team" className="hover:underline">OAPs</Link>
           </li>
           <li>
+            <Link href="/shows" className="hover:underline">Shows</Link>
+          </li>
+          <li>
             <Link href="/about" className="hover:underline">About</Link>
           </li>
           <li>
@@ -63,6 +66,9 @@ export default function Navbar() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/team">OAPs</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/shows">Shows</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/about">About</Link>
