@@ -27,7 +27,7 @@ export default function ShowsPage() {
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Shows</h1>
           <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-            The full weekly lineup{selected ? ` for ${selected.name}` : ""} — pulled live from the schedule.
+            The full weekly lineup{selected ? ` for ${selected.name}` : ""}, pulled live from the schedule.
           </p>
         </header>
 
