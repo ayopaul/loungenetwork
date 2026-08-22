@@ -21,13 +21,18 @@ export default function PlayerDock() {
     toggleMute
   } = useGlobalAudio();
 
-  if (!selected || !show) return null;
+  // A station being selected is all that's required to play the live
+  // stream (see useGlobalAudio.togglePlayback) -- `show` is only used to
+  // label what's currently on. Hiding the whole dock whenever there's a
+  // gap in the schedule (nothing airs 24/7) took the play button away
+  // entirely, so only bail out when there's no station at all.
+  if (!selected) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg bg-background/70 border-t-[1.0px] border-[#E83273] text-foreground px-4 py-2 flex items-center justify-between shadow-md">
       {/* Show Info */}
       <div className="flex items-center gap-3 overflow-hidden">
-        {!imageError && show.thumbnailUrl ? (
+        {!imageError && show?.thumbnailUrl ? (
           <Image
             src={show.thumbnailUrl}
             alt={show.showTitle}
@@ -43,8 +48,10 @@ export default function PlayerDock() {
           </div>
         )}
         <div className="truncate">
-          <p className="text-sm font-medium truncate">{show.showTitle}</p>
-          <p className="text-[13px] text-foreground font-normal leading-tight tracking-normal truncate">{show.startTime} – {show.endTime}</p>
+          <p className="text-sm font-medium truncate">{show?.showTitle ?? `${selected.name} Radio`}</p>
+          <p className="text-[13px] text-foreground font-normal leading-tight tracking-normal truncate">
+            {show ? `${show.startTime} – ${show.endTime}` : "Live stream"}
+          </p>
         </div>
       </div>
 

@@ -12,6 +12,36 @@ type Show = {
   weekday: number;
 };
 
+// All three stations broadcast from Nigeria (WAT, UTC+1, no DST), but a
+// visitor's browser clock can be in any timezone. Deriving "now" from the
+// visitor's local time made the current-show match (and therefore whether
+// the player shows at all) depend on where the visitor happens to be.
+// Anchor it to the station's actual timezone instead.
+function getLagosNow(): { weekday: number; minutes: number } {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Africa/Lagos",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date());
+
+  const weekdayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  };
+
+  let weekday = 0;
+  let hour = 0;
+  let minute = 0;
+  for (const part of parts) {
+    if (part.type === "weekday") weekday = weekdayMap[part.value] ?? 0;
+    else if (part.type === "hour") hour = Number(part.value) % 24; // Intl can yield "24" for midnight
+    else if (part.type === "minute") minute = Number(part.value);
+  }
+
+  return { weekday, minutes: hour * 60 + minute };
+}
+
 export function useCurrentShow(): Show | null {
   const [currentShow, setCurrentShow] = useState<Show | null>(null);
 
@@ -19,7 +49,7 @@ export function useCurrentShow(): Show | null {
     const fetchSchedule = async () => {
       try {
         const res = await fetch("/api/schedule");
-        
+
         if (!res.ok) {
           console.error(`❌ API returned ${res.status}: ${res.statusText}`);
           setCurrentShow(null);
@@ -27,7 +57,7 @@ export function useCurrentShow(): Show | null {
         }
 
         const data = await res.json();
-        
+
         // Check if we got an error response
         if (data.error) {
           console.error("❌ API Error:", data.error);
@@ -42,9 +72,7 @@ export function useCurrentShow(): Show | null {
           return;
         }
 
-        const now = new Date();
-        const currentWeekday = now.getDay(); // Sunday = 0
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const { weekday: currentWeekday, minutes: currentMinutes } = getLagosNow();
 
         const todayShows = data.filter((s: Show) => s.weekday === currentWeekday);
 

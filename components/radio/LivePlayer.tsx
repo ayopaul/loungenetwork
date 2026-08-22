@@ -16,7 +16,10 @@ export default function LivePlayer() {
 
   const [expanded, setExpanded] = useState(false);
 
-  if (!selected || !show) return null;
+  // Same reasoning as PlayerDock: `show` only labels what's on, it isn't
+  // required to play the live stream, so a schedule gap shouldn't hide
+  // the whole hero player.
+  if (!selected) return null;
 
   return (
     <Card className="bg-[linear-gradient(129deg,#E83273,#E43240,#DC4C24,#BD271A,#991E2F)] text-white shadow-lg rounded-2xl border-0">
@@ -25,21 +28,23 @@ export default function LivePlayer() {
           <StationSelect />
 
           <span className="bg-red-500 text-white text-xs font-medium rounded-md px-2.5 py-1 whitespace-nowrap">
-            ON AIR NOW
+            {show ? "ON AIR NOW" : "LIVE"}
           </span>
         </div>
       </CardHeader>
 
       <CardContent className="flex items-center gap-4">
-        <div className="relative w-[30vw] max-w-[96px] aspect-square rounded-lg overflow-hidden">
-          <Image
-            src={show.thumbnailUrl}
-            alt={show.showTitle}
-            fill
-            sizes="96px"
-            className="object-cover"
-            unoptimized
-          />
+        <div className="relative w-[30vw] max-w-[96px] aspect-square rounded-lg overflow-hidden bg-black/20">
+          {show?.thumbnailUrl && (
+            <Image
+              src={show.thumbnailUrl}
+              alt={show.showTitle}
+              fill
+              sizes="96px"
+              className="object-cover"
+              unoptimized
+            />
+          )}
           <button
             onClick={togglePlayback}
             className="absolute inset-0 bg-black/30 hover:bg-black/40 transition rounded-lg flex items-center justify-center"
@@ -59,7 +64,7 @@ export default function LivePlayer() {
             onClick={() => setExpanded(!expanded)}
           >
             <p className={`text-lg font-semibold text-justify ${expanded ? '' : 'truncate'}`}>
-              {show.showTitle}
+              {show?.showTitle ?? `${selected.name} Radio`}
             </p>
           </div>
           <div
@@ -67,12 +72,14 @@ export default function LivePlayer() {
             onClick={() => setExpanded(!expanded)}
           >
             <p className={`text-sm text-white/70 text-justify ${expanded ? '' : 'line-clamp-2'}`}>
-              {show.description}
+              {show?.description ?? "Streaming live now. Tap play to tune in."}
             </p>
           </div>
-          <p className="text-xs text-white/60">
-            {show.startTime} – {show.endTime}
-          </p>
+          {show && (
+            <p className="text-xs text-white/60">
+              {show.startTime} – {show.endTime}
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
